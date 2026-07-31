@@ -1,0 +1,54 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gitdown",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-30",
+
+  // Static assets are served directly by the edge without invoking the Worker,
+  // and are never billed. Only requests that match no asset reach `fetch`.
+  // A request matching a static file is served by the edge without invoking the
+  // Worker, and is never billed. Anything else falls through to `fetch`, which
+  // is how /issues/:n gets a real URL rather than a query parameter.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    // Without this the asset router claims /issues/6 before the Worker sees it
+    // and redirects to /issue. These two prefixes always invoke the Worker;
+    // everything else (CSS, JS, images) is still served free and uncounted.
+    "run_worker_first": ["/issues/*", "/api/*", "/503"]
+  },
+
+  // Statuspage incidents move on the order of minutes; one minute is the
+  // shortest interval Cron Triggers support and is well inside that.
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gitdown",
+      "database_id": "c8e2c8af-2069-4314-88c8-89029ed60924",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // Keep the workers.dev URL alive alongside the custom domain. Declaring
+  // `routes` without this silently turns it off.
+  "workers_dev": true,
+
+  // Declared here rather than left as dashboard-only state, so the domain is
+  // reproducible from the repo and a deploy cannot quietly drop it. Cloudflare
+  // manages the DNS record and TLS certificate for a custom domain itself.
+  "routes": [{ "pattern": "gitdown.chat", "custom_domain": true }],
+
+  "vars": {
+    // How much history the one-time backfill seeds. Raise it locally when
+    // GitHub has been behaving and a week of history is empty.
+    "BACKFILL_DAYS": "7"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}

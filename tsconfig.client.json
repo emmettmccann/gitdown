@@ -1,0 +1,12 @@
+{
+  // The front-end bundle. Separate from the Worker config because it needs the
+  // DOM lib and must NOT see the Workers runtime globals — the two define
+  // overlapping names (fetch, Response, …) and mixing them hides real errors.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "types": []
+  },
+  "include": ["src/client/**/*.ts", "src/shared/**/*.ts"],
+  "exclude": []
+}
