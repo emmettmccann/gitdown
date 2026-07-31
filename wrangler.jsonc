@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gitdown",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-30",
+
+  // Static assets are served directly by the edge without invoking the Worker,
+  // and are never billed. Only requests that match no asset reach `fetch`.
+  "assets": {
+    "directory": "./public"
+  },
+
+  // Statuspage incidents move on the order of minutes; one minute is the
+  // shortest interval Cron Triggers support and is well inside that.
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}
