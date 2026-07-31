@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Issue · emmettmccann/gitdown</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/css/style.css?v=5">
+<link rel="stylesheet" href="/css/style.css?v=6">
 </head>
 <body>
 
@@ -24,6 +24,7 @@
   <div class="search">
     <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13 6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0 .52-.09.7-.3a1 1 0 0 0 0-1.4zM3 6c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4z"></path></svg>
     Search or jump to…
+    <span class="hotkey">/</span>
   </div>
   <div class="auth">
     <a class="btn" href="/503">Sign in</a>
@@ -59,10 +60,15 @@
   <main class="issues-main" style="max-width:100%;">
     <div class="issue-detail-header">
       <h1><span id="issue-title">Loading…</span> <span class="issue-number" id="issue-number"></span></h1>
-      <a class="btn" href="https://www.githubstatus.com">Real status page ↗</a>
+      <div class="header-actions">
+        <a class="btn" href="https://www.githubstatus.com">Real status page ↗</a>
+        <a class="btn btn-primary" href="/503">New issue</a>
+      </div>
     </div>
-    <div id="issue-state"></div>
-    <div class="issue-subtitle" id="issue-subtitle"></div>
+    <div class="issue-meta-row">
+      <div id="issue-state"></div>
+      <div class="issue-subtitle" id="issue-subtitle"></div>
+    </div>
 
     <div class="issue-content">
       <div class="issue-conversation">
@@ -79,19 +85,33 @@
       </div>
 
       <aside class="issue-meta-sidebar">
+        <!-- Section order and empty-state wording follow the real issue
+             sidebar; the ones gitdown can never fill stay as dead chrome. -->
+        <div class="meta-section">
+          <h3>Assignees</h3>
+          <span class="empty">No one assigned</span>
+        </div>
         <div class="meta-section">
           <h3>Labels</h3>
           <div id="issue-labels"></div>
+        </div>
+        <div class="meta-section">
+          <h3>Projects</h3>
+          <span class="empty">No projects</span>
+        </div>
+        <div class="meta-section">
+          <h3>Milestone</h3>
+          <span class="empty">No milestone</span>
+        </div>
+        <div class="meta-section">
+          <h3>Participants</h3>
+          <div class="avatar-stack"><span class="avatar-sm avatar-c2" title="githubstatus"></span></div>
         </div>
         <div class="meta-section">
           <h3>Source</h3>
           <a id="issue-source" class="sidebar-action-link" href="https://www.githubstatus.com" hidden>
             View on githubstatus.com
           </a>
-        </div>
-        <div class="meta-section">
-          <h3>Participants</h3>
-          <div class="avatar-stack"><span class="avatar-sm avatar-c2" title="githubstatus"></span></div>
         </div>
       </aside>
     </div>

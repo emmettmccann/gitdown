@@ -170,6 +170,15 @@ async function initIssueDetail(): Promise<void> {
 function renderLabels(labels: string[]): void {
   const container = document.getElementById("issue-labels");
   if (!container) return;
+  if (labels.length === 0) {
+    // Every other sidebar section states its own emptiness; labels should not
+    // be the one that just leaves a gap.
+    const empty = document.createElement("span");
+    empty.className = "empty";
+    empty.textContent = "No labels";
+    container.replaceChildren(empty);
+    return;
+  }
   container.replaceChildren(...labels.map(labelChip));
 }
 

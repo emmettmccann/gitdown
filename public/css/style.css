@@ -4,7 +4,13 @@
   --color-canvas-default: #ffffff;
   --color-canvas-subtle: #f6f8fa;
   --color-canvas-inset: #f6f8fa;
-  --color-header-bg: #24292f;
+  --color-header-bg: #1f2328;
+  /* github.com puts the repo title/tabs block on --page-header-bgColor, a
+     subtle grey, rather than on the page background. */
+  --color-page-header-bg: #f6f8fa;
+  /* Primer's Counter background: a translucent grey so counters read the same
+     on white and on the grey page header. */
+  --color-neutral-muted: rgba(129, 139, 152, 0.2);
   --color-border-default: #d1d9e0;
   --color-border-muted: #d8dee4;
   --color-fg-default: #1f2328;
@@ -30,7 +36,8 @@ body {
   margin: 0;
   background: var(--color-canvas-default);
   color: var(--color-fg-default);
-  font-family: -apple-system, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   font-size: 14px;
   line-height: 1.5;
 }
@@ -47,7 +54,9 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 24px;
+  /* The marketing header pads to 32px at desktop widths (Primer px-lg-5), the
+     same gutter the repo header and page body use. */
+  padding: 16px 32px;
 }
 .gh-header a { color: #fff; }
 .gh-header .logo { display: flex; }
@@ -66,6 +75,15 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
   padding: 6px 10px;
   width: 272px;
   font-size: 14px;
+}
+/* The "/" hotkey hint sitting at the right edge of the search field. */
+.gh-header .search .hotkey {
+  margin-left: auto;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  padding: 0 6px;
+  font-size: 12px;
+  line-height: 18px;
 }
 .gh-header .auth { display: flex; gap: 8px; align-items: center; }
 .btn {
@@ -86,17 +104,30 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
   color: #fff;
 }
 .btn-primary:hover { background: var(--color-btn-primary-hover-bg); }
+.btn-sm { font-size: 12px; padding: 3px 12px; }
+/* Signed-out header buttons: "Sign in" is transparent with a hairline border,
+   "Sign up" is the solid inverted one. */
+.gh-header .auth .btn {
+  background: transparent;
+  border-color: rgba(255,255,255,0.2);
+  color: #fff;
+}
+.gh-header .auth .btn:hover { background: rgba(255,255,255,0.1); }
 .gh-header .btn-invert {
   background: #fff;
-  color: #24292f;
+  border-color: transparent;
+  color: #1f2328;
 }
+.gh-header .btn-invert:hover { background: #f6f8fa; }
 
 /* ---------- Repo header / tabs ---------- */
 .repo-header {
+  background: var(--color-page-header-bg);
   border-bottom: 1px solid var(--color-border-muted);
-  padding: 16px 24px 0;
+  padding: 16px 32px 0;
 }
 .repo-title { font-size: 20px; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+.repo-title > .octicon { color: var(--color-fg-muted); }
 .repo-title .owner { color: var(--color-fg-muted); }
 .repo-title .sep { color: var(--color-fg-muted); }
 .repo-title .name { font-weight: 600; }
@@ -108,7 +139,10 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
   color: var(--color-fg-muted);
   margin-left: 4px;
 }
-.repo-actions { float: right; display: flex; gap: 8px; margin-top: -40px; }
+.repo-actions { float: right; display: flex; gap: 8px; margin-top: -38px; }
+/* Watch/Fork/Star are btn-sm on github.com, a size down from the page buttons. */
+.repo-actions .btn { font-size: 12px; padding: 3px 12px; }
+.repo-actions .btn .octicon { height: 14px; width: 14px; }
 .repo-tabs { display: flex; list-style: none; margin: 16px 0 0; padding: 0; gap: 8px; }
 .repo-tabs li a {
   display: flex; align-items: center; gap: 6px;
@@ -120,17 +154,17 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
 .repo-tabs li a:hover { text-decoration: none; border-bottom-color: var(--color-border-default); }
 .repo-tabs li a.active { border-bottom-color: #fd8c73; font-weight: 600; }
 .repo-tabs .count {
-  background: var(--color-canvas-subtle);
+  background: var(--color-neutral-muted);
   border-radius: 2em;
   font-size: 12px;
   padding: 0 6px;
-  color: var(--color-fg-muted);
+  color: var(--color-fg-default);
 }
 
 /* ---------- Page layout ---------- */
-.page-layout { display: flex; max-width: 1280px; margin: 0 auto; padding: 24px; gap: 24px; }
-.issues-sidebar { width: 200px; flex-shrink: 0; }
-.issues-sidebar nav ul { list-style: none; margin: 0 0 20px; padding: 0; }
+.page-layout { display: flex; max-width: 1280px; margin: 0 auto; padding: 24px 32px; gap: 24px; }
+.issues-sidebar { width: 220px; flex-shrink: 0; }
+.issues-sidebar nav ul { list-style: none; margin: 0; padding: 0; }
 .issues-sidebar nav ul li a {
   display: flex; align-items: center; gap: 8px;
   color: var(--color-fg-default);
@@ -139,20 +173,58 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
   font-size: 14px;
 }
 .issues-sidebar nav ul li a:hover { background: var(--color-canvas-subtle); text-decoration: none; }
+/* Every entry carries a leading octicon in the real sidebar; muted, so the
+   label is what the eye lands on. */
+.issues-sidebar nav ul li a .octicon { color: var(--color-fg-muted); flex-shrink: 0; }
+.sidebar-divider {
+  border: 0;
+  border-top: 1px solid var(--color-border-muted);
+  margin: 8px 0;
+}
 .issues-main { flex: 1; min-width: 0; }
 
 /* ---------- Issue list ---------- */
-.issues-main h1 { font-size: 24px; margin: 0 0 16px; }
+/* The list page leads with a PageHeader: title left, primary action right, and
+   a rule separating it from the list. */
+.page-title-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  border-bottom: 1px solid var(--color-border-muted);
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+.issues-main h1 { font-size: 24px; margin: 0; }
 .filter-bar {
   display: flex; gap: 8px; margin-bottom: 16px;
 }
-.filter-bar input {
-  flex: 1;
+/* Input and its submit button share one rounded outline, so the pair reads as
+   a single control. */
+.filter-input {
+  display: flex; flex: 1; min-width: 0;
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-canvas-default);
+}
+.filter-input input {
+  flex: 1; min-width: 0;
+  border: none;
+  background: transparent;
   padding: 5px 12px;
   font-size: 14px;
+  color: var(--color-fg-default);
+  font-family: inherit;
 }
+.filter-input input:focus { outline: none; }
+.filter-input .filter-submit {
+  border: none;
+  border-left: 1px solid var(--color-border-default);
+  background: var(--color-canvas-subtle);
+  color: var(--color-fg-muted);
+  padding: 0 10px;
+  cursor: pointer;
+  display: flex; align-items: center;
+}
+.filter-input .filter-submit:hover { background: #eef1f4; }
 .issue-list-toolbar {
   display: flex; align-items: center; justify-content: space-between;
   background: var(--color-canvas-subtle);
@@ -162,6 +234,15 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
 }
 .issue-list-toolbar .state-tabs { display: flex; gap: 16px; }
 .issue-list-toolbar .state-tabs a { color: var(--color-fg-default); font-weight: 600; display: flex; gap: 4px; align-items: center; }
+/* Open/Closed counts render as Primer Counters, not bare numbers. */
+.counter {
+  background: var(--color-neutral-muted);
+  border-radius: 2em;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-fg-default);
+}
 .issue-list-toolbar .filters { display: flex; gap: 16px; }
 .issue-list-toolbar .filters button {
   background: none; border: none; color: var(--color-fg-default); font-size: 14px; cursor: pointer;
@@ -183,7 +264,7 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
 .issue-row:hover { background: var(--color-canvas-subtle); }
 .issue-row .state-icon { color: var(--color-open-bg); margin-top: 2px; }
 .issue-row .issue-body { flex: 1; min-width: 0; }
-.issue-row .issue-title { font-weight: 600; color: var(--color-fg-default); }
+.issue-row .issue-title { font-size: 16px; font-weight: 600; color: var(--color-fg-default); }
 .issue-row .issue-title:hover { color: var(--color-accent-fg); }
 .issue-row .issue-meta { color: var(--color-fg-muted); font-size: 12px; margin-top: 4px; }
 .issue-row .issue-meta a { color: inherit; }
@@ -198,9 +279,18 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
 }
 
 /* ---------- Single issue page ---------- */
-.issue-detail-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
-.issue-detail-header h1 { font-size: 28px; font-weight: 400; margin: 0; }
-.issue-detail-header h1 .issue-number { color: var(--color-fg-muted); font-weight: 300; }
+.issue-detail-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.issue-detail-header h1 { font-size: 32px; font-weight: 600; line-height: 1.25; margin: 0; }
+.issue-detail-header h1 .issue-number { color: var(--color-fg-muted); font-weight: 400; }
+.issue-detail-header .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
+/* State pill and the "who opened this" line share one row, closed off by a
+   rule — the metadata strip under the title on github.com. */
+.issue-meta-row {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  border-bottom: 1px solid var(--color-border-muted);
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
 .state-badge {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--color-open-bg);
@@ -209,7 +299,6 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
   padding: 4px 12px;
   font-weight: 600;
   font-size: 14px;
-  margin-bottom: 16px;
 }
 .state-badge.closed { background: var(--color-closed-bg); }
 
@@ -259,7 +348,9 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
 
 .meta-section { border-bottom: 1px solid var(--color-border-muted); padding: 16px 0; }
 .meta-section:first-child { padding-top: 0; }
-.meta-section h3 { font-size: 14px; margin: 0 0 8px; }
+/* Sidebar section titles are small, semibold and muted; the value below them
+   carries the normal body size. */
+.meta-section h3 { font-size: 12px; font-weight: 600; color: var(--color-fg-muted); margin: 0 0 8px; }
 .meta-section .empty { color: var(--color-fg-muted); font-size: 14px; }
 
 .gh-footer {
@@ -384,8 +475,7 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
 .sidebar-action-link {
   display: flex; align-items: center; gap: 6px;
   color: var(--color-fg-muted);
-  font-size: 12px;
-  margin-top: 16px;
+  font-size: 14px;
 }
 .sidebar-action-link:hover { color: var(--color-accent-fg); }
 
