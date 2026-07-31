@@ -61,70 +61,58 @@
     artwork rather than their asset, for the same trademark reason the rest of
     the site avoids shipping GitHub's marks.
   -->
-  <svg class="unicorn" viewBox="0 0 320 260" role="img" aria-label="A unicorn, lying down, unbothered">
+  <svg class="unicorn" viewBox="0 0 320 320" role="img"
+       aria-label="A pink unicorn with a rainbow mane, drawn slightly wrong on purpose">
     <defs>
-      <linearGradient id="mane" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%"   stop-color="#ff7b72"/>
-        <stop offset="25%"  stop-color="#ffa657"/>
-        <stop offset="50%"  stop-color="#d2a8ff"/>
-        <stop offset="75%"  stop-color="#79c0ff"/>
-        <stop offset="100%" stop-color="#7ee787"/>
-      </linearGradient>
-      <linearGradient id="horn" x1="0" y1="1" x2="0" y2="0">
-        <stop offset="0%"   stop-color="#e3b341"/>
-        <stop offset="100%" stop-color="#ffd782"/>
+      <linearGradient id="hornGrad" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#e0a020"/>
+        <stop offset="100%" stop-color="#ffe27a"/>
       </linearGradient>
     </defs>
 
-    <ellipse cx="168" cy="236" rx="120" ry="12" fill="#1f2328" opacity="0.07"/>
+    <g stroke="#9e1050" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
 
-    <!-- tail -->
-    <path d="M250 170 C292 158 300 124 286 100 C302 132 296 174 252 190 Z" fill="url(#mane)"/>
+      <!-- Mane. Deliberately a bit spiky and uneven, and the horn a bit thin:
+           a pixel-perfect unicorn would be off-message on a site whose entire
+           premise is that things are broken. Do not tidy this up. -->
+      <path d="M168 92 C206 62 250 70 272 96 C244 86 212 92 190 112 Z" fill="#3fbf5f"/>
+      <path d="M178 104 C218 84 258 100 276 132 C250 112 218 112 196 128 Z" fill="#ffd23d"/>
+      <path d="M188 124 C228 116 264 138 274 172 C252 146 220 140 200 150 Z" fill="#ff9838"/>
+      <path d="M196 150 C234 154 262 182 260 214 C246 186 218 172 202 174 Z" fill="#ff6ba9"/>
+      <path d="M202 178 C232 190 250 218 242 246 C234 220 214 204 200 200 Z" fill="#4fc3f7"/>
 
-    <!-- body, lying down -->
-    <path d="M104 196 C104 156 136 132 178 132 C226 132 258 156 258 190
-             C258 206 246 214 226 214 L128 214 C112 214 104 208 104 196 Z"
-          fill="#f0f3f6" stroke="#d1d9e0" stroke-width="3"/>
+      <!-- ear -->
+      <path d="M182 96 C196 74 214 70 222 78 C226 90 214 108 198 114 Z" fill="#f7a8c4"/>
 
-    <!-- folded foreleg -->
-    <path d="M132 214 C126 198 138 188 158 190 C176 192 184 202 182 214 Z"
-          fill="#e6ebf1" stroke="#d1d9e0" stroke-width="3"/>
+      <!-- head -->
+      <path d="M160 88
+               C129 107 104 158 84 204
+               C73 221 58 228 60 241
+               C62 254 75 257 87 263
+               C104 281 122 291 142 289
+               C168 286 191 272 201 248
+               C213 220 215 179 207 147
+               C199 115 182 94 160 88 Z"
+            fill="#f7a8c4"/>
 
-    <!-- neck -->
-    <path d="M116 198 C104 168 104 132 118 106 L162 118 C156 146 158 176 168 198 Z"
-          fill="#f0f3f6" stroke="#d1d9e0" stroke-width="3"/>
+      <!-- forelock, falling over the brow -->
+      <path d="M158 92 C142 112 138 136 146 154 C130 142 126 116 138 96 Z" fill="#3fbf5f"/>
 
-    <!-- muzzle, drawn before the head so the join is hidden rather than seamed -->
-    <path d="M78 74 C58 74 48 82 48 91 C48 100 60 105 74 101 C84 98 88 86 84 78 Z"
-          fill="#f6f8fa" stroke="#d1d9e0" stroke-width="3"/>
+      <!-- eye: narrowed, thoroughly unimpressed -->
+      <path d="M112 178 C126 166 146 168 154 180 C140 178 124 180 112 178 Z" fill="#9e1050"/>
+      <path d="M116 192 C128 186 142 186 152 192" fill="none" stroke-width="6"/>
 
-    <!-- head -->
-    <path d="M118 110 C96 108 78 96 70 78 C64 64 70 50 84 44
-             C100 37 122 40 134 52 C146 64 150 84 144 100
-             C140 110 130 112 118 110 Z"
-          fill="#f6f8fa" stroke="#d1d9e0" stroke-width="3"/>
-    <circle cx="58" cy="89" r="3.2" fill="#59636e"/>
+      <!-- nostril -->
+      <path d="M80 236 C88 232 95 236 95 243 C95 250 87 253 81 249 C76 245 76 239 80 236 Z"
+            fill="#9e1050"/>
 
-    <!-- closed eye: it is not worried about this -->
-    <path d="M92 68 C98 74 106 74 112 68" fill="none" stroke="#1f2328"
-          stroke-width="3.5" stroke-linecap="round"/>
+      <!-- mouth, with the beginnings of a smirk -->
+      <path d="M92 268 C108 278 126 280 140 274" fill="none" stroke-width="6"/>
 
-    <!-- ear -->
-    <path d="M126 44 L134 20 L148 42 Z" fill="#f6f8fa" stroke="#d1d9e0" stroke-width="3"
-          stroke-linejoin="round"/>
-
-    <!-- horn -->
-    <path d="M96 40 L110 2 L120 42 Z" fill="url(#horn)" stroke="#c99a2e"
-          stroke-width="2.5" stroke-linejoin="round"/>
-    <path d="M101 30 L116 26 M104 18 L114 15" stroke="#c99a2e" stroke-width="2.5"
-          stroke-linecap="round"/>
-
-    <!-- mane -->
-    <path d="M132 46 C158 52 166 76 158 100 C152 120 152 142 160 160
-             C142 150 134 126 138 102 C141 82 138 62 126 52 Z"
-          fill="url(#mane)"/>
-    <path d="M120 104 C138 112 144 132 140 156 C132 138 126 122 114 114 Z"
-          fill="url(#mane)" opacity="0.85"/>
+      <!-- horn -->
+      <path d="M156 90 L104 12 L176 74 Z" fill="url(#hornGrad)"/>
+      <path d="M128 46 L150 62 M116 30 L142 48" stroke="#9e1050" stroke-width="5"/>
+    </g>
   </svg>
 
   <p class="quip" id="quip">You really thought the links would work?</p>

@@ -33,6 +33,19 @@
     }
   ],
 
+  // Keep the workers.dev URL alive alongside the custom domain. Declaring
+  // `routes` without this silently turns it off.
+  "workers_dev": true,
+
+  // Custom domains are declared here rather than clicked in the dashboard.
+  // Cloudflare creates the DNS record and provisions the TLS certificate on
+  // deploy — but only if nothing else already occupies that hostname. Blocked
+  // until the imported GoDaddy landing-page records are deleted.
+  // "routes": [
+  //   { "pattern": "gitdown.chat", "custom_domain": true },
+  //   { "pattern": "www.gitdown.chat", "custom_domain": true }
+  // ],
+
   "vars": {
     // How much history the one-time backfill seeds. Raise it locally when
     // GitHub has been behaving and a week of history is empty.
