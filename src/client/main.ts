@@ -3,7 +3,7 @@
  * finds in the DOM.
  */
 import { fetchIssue, fetchIssues, fetchTimeline } from "./api.js";
-import { issueRow, labelChip, stateBadge, timelineRow } from "./render.js";
+import { BOT_ACTOR, issueRow, labelChip, stateBadge, timelineRow } from "./render.js";
 import { startPolling } from "./poll.js";
 import { relativeTime } from "./time.js";
 import type { IssueState } from "../shared/api.js";
@@ -125,7 +125,7 @@ async function initIssueDetail(): Promise<void> {
   const subtitle = document.getElementById("issue-subtitle");
   if (subtitle) {
     subtitle.textContent =
-      `githubstatus opened this ${relativeTime(issue.createdAt)}` +
+      `${BOT_ACTOR} opened this ${relativeTime(issue.createdAt)}` +
       ` · ${issue.events.length} update${issue.events.length === 1 ? "" : "s"}`;
   }
 

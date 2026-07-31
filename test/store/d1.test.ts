@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { D1IssueStore } from "../../src/store/d1.js";
 import { diffIncident } from "../../src/reconcile/diff.js";
 import { PAGE_CURSOR_KEY, reconcile } from "../../src/reconcile/reconcile.js";
-import type { IssueChange } from "../../src/reconcile/types.js";
+import { BOT_ACTOR, type IssueChange } from "../../src/reconcile/types.js";
 import { parseIncidentsResponse, type ParsedFeed } from "../../src/statuspage/parse.js";
 import type { Incident } from "../../src/statuspage/schema.js";
 import { allSnapshots, snapshotAfter } from "../helpers/replay.js";
@@ -102,12 +102,12 @@ describe("applying a change set", () => {
     expect(update!.body).toContain("investigating");
   });
 
-  it("attributes bot rows to githubstatus", async () => {
+  it("attributes every bot row to the bot actor", async () => {
     const store = new D1IssueStore(env.DB);
     await store.apply(diffIncident(RICH, null));
 
     const actors = await rows<{ actor: string }>("SELECT DISTINCT actor FROM timeline");
-    expect(actors).toEqual([{ actor: "githubstatus" }]);
+    expect(actors).toEqual([{ actor: BOT_ACTOR }]);
   });
 
   it("rolls the whole change set back if any statement fails", async () => {

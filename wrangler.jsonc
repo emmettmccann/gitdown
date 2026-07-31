@@ -28,9 +28,7 @@
     {
       "binding": "DB",
       "database_name": "gitdown",
-      // Placeholder. Replace with the id printed by `wrangler d1 create gitdown`
-      // before the first deploy; local dev and tests ignore it entirely.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "c8e2c8af-2069-4314-88c8-89029ed60924",
       "migrations_dir": "migrations"
     }
   ],
