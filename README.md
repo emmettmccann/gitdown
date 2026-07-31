@@ -4,7 +4,9 @@ A parody of the GitHub Issues UI that turns **GitHub's own status page into a co
 
 When GitHub opens an incident on [githubstatus.com](https://www.githubstatus.com), gitdown opens a corresponding issue. Each official incident update becomes a bot comment on that issue's timeline, component outages become timeline events, impact escalation becomes a label change, and when GitHub resolves the incident the issue closes — permanently. While it's open, anyone can pile in and complain.
 
-The visual layer is hand-built HTML/CSS that mimics github.com's issues views. Nothing is scraped or copied from GitHub's source; it's recreated to look the part.
+The visual layer is hand-built HTML/CSS that mimics github.com's issues views as they look to a **signed-in** user — light header with the repo in the breadcrumb, side nav on the issues dashboard, a comment composer under the thread. Nothing is scraped or copied from GitHub's source; it's recreated to look the part.
+
+The composer is chrome. Comments are step 6 (see [SPEC.md](SPEC.md#16-build-order)) and nothing there posts anything: every control routes to the unicorn page like the rest of the dead chrome, and the whole block is hidden once an incident resolves and the thread locks.
 
 See [SPEC.md](SPEC.md) for the full design — architecture, data model, cost model, and the reasoning behind the decisions.
 
