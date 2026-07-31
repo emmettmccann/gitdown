@@ -75,7 +75,11 @@ function patchFor(incident: Incident): IssuePatch {
     impact: incident.impact,
     status: incident.status,
     components: componentNames(incident),
+    shortlink: incident.shortlink,
+    startedAt: incident.started_at,
     resolvedAt: incident.resolved_at,
+    createdAt: incident.created_at,
+    updatedAt: incident.updated_at,
     srcUpdatedAt: incident.updated_at,
   };
 }

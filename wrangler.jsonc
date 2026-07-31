@@ -16,6 +16,17 @@
     "crons": ["* * * * *"]
   },
 
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gitdown",
+      // Placeholder. Replace with the id printed by `wrangler d1 create gitdown`
+      // before the first deploy; local dev and tests ignore it entirely.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+
   "observability": {
     "enabled": true
   }

@@ -5,10 +5,10 @@
  * before this code runs, `fetch` handles the API, and `scheduled` drives
  * ingestion once a minute.
  *
- * Only the ingestion source layer exists so far; reconcile and the API land in
- * the next steps of the build order.
+ * The API is not built yet — that is step 4.
  */
-import { fetchSummary } from "./statuspage/client.js";
+import { ingest } from "./ingest/index.js";
+import { D1IssueStore } from "./store/d1.js";
 
 export default {
   async fetch(request: Request): Promise<Response> {
@@ -23,27 +23,40 @@ export default {
     return Response.json({ error: "not implemented" }, { status: 501 });
   },
 
-  async scheduled(_controller: ScheduledController, _env: Env, ctx: ExecutionContext) {
-    ctx.waitUntil(poll());
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(runIngestion(env));
   },
 } satisfies ExportedHandler<Env>;
 
-async function poll(): Promise<void> {
-  const feed = await fetchSummary();
+async function runIngestion(env: Env): Promise<void> {
+  const store = new D1IssueStore(env.DB);
 
-  // Rejected incidents are the signal that githubstatus.com has changed shape
-  // under us. Surfacing them is the whole point of validating (SPEC 14).
-  for (const rejection of feed.rejected) {
-    console.error(`statuspage: rejected incident ${rejection.id ?? "<unknown>"} — ${rejection.error}`);
+  try {
+    const result = await ingest(store);
+
+    // Rejected incidents mean githubstatus.com has changed shape under us —
+    // surfacing them is the whole point of validating at the boundary.
+    for (const rejection of result.rejected) {
+      console.error(
+        `statuspage: rejected incident ${rejection.id ?? "<unknown>"} — ${rejection.error}`,
+      );
+    }
+
+    console.log(
+      JSON.stringify({
+        msg: "ingest",
+        skipped: result.skipped,
+        opened: result.opened,
+        changed: result.changed,
+        closed: result.closed,
+        unchanged: result.unchanged,
+        rejected: result.rejected.length,
+      }),
+    );
+  } catch (error) {
+    // A failed poll is recoverable — the cursor only advances on success, so
+    // the next run reprocesses. Log and let the cron retry rather than throwing
+    // into the runtime.
+    console.error(`ingest failed: ${error instanceof Error ? error.stack : String(error)}`);
   }
-
-  console.log(
-    JSON.stringify({
-      msg: "statuspage poll",
-      page_updated_at: feed.page.updated_at,
-      unresolved: feed.incidents.length,
-      components: feed.components.length,
-      rejected: feed.rejected.length,
-    }),
-  );
 }

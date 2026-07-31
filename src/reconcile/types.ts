@@ -85,14 +85,24 @@ export interface AmendedUpdate {
   editedAt: number;
 }
 
-/** Field-level changes to the issue row itself. */
+/**
+ * Field-level state of the issue row.
+ *
+ * Carries everything needed to insert the row from scratch, not just what
+ * changed, so a store can apply a change set without ever seeing the incident
+ * it came from.
+ */
 export interface IssuePatch {
   title: string;
   state: IssueState;
   impact: IncidentImpact;
   status: IncidentStatus;
   components: string[];
+  shortlink: string;
+  startedAt: number;
   resolvedAt: number | null;
+  createdAt: number;
+  updatedAt: number;
   srcUpdatedAt: number;
 }
 

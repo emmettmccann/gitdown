@@ -532,7 +532,9 @@ Everything not on this list is configured from `wrangler.jsonc` in the repo, not
 | 4 | GitHub fine-grained PAT, `issues: write` — *PoC only* | free | §5 `GitHubSink` |
 | 5 | Statuspage webhook subscription on githubstatus.com | free | Optional (§4.4) — cuts latency 60s → ~2s |
 
-Provisioned **from the repo**, no manual setup: D1 database, cron trigger, static asset serving, cache configuration, custom domain binding.
+Provisioned **from the repo**, no manual setup: cron trigger, static asset serving, cache configuration, custom domain binding, and the database schema (`wrangler d1 migrations apply`).
+
+One-time exception: `wrangler d1 create gitdown` prints a `database_id` that must replace the placeholder in `wrangler.jsonc`. Local dev and tests ignore it, so this only blocks the first deploy.
 
 Explicitly **not** required: no separate host, no Pages project, no Vercel/Netlify, no Postgres/Supabase, no Redis, no CDN service, no queue (§9.2).
 

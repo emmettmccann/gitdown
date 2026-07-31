@@ -8,12 +8,11 @@
  */
 import type {
   IssueChange,
-  IssueState,
+  IssuePatch,
   IssueStore,
   StoredIssue,
   TimelineEvent,
 } from "../../src/reconcile/types.js";
-import type { IncidentImpact, IncidentStatus } from "../../src/statuspage/schema.js";
 
 export interface StoredRow {
   seq: number;
@@ -26,17 +25,10 @@ export interface StoredRow {
   deletedAt?: number;
 }
 
-interface IssueRecord {
+type IssueRecord = IssuePatch & {
   incidentId: string;
   number: number;
-  title: string;
-  state: IssueState;
-  impact: IncidentImpact;
-  status: IncidentStatus;
-  components: string[];
-  resolvedAt: number | null;
-  srcUpdatedAt: number;
-}
+};
 
 export class MemoryIssueStore implements IssueStore {
   private readonly issues = new Map<string, IssueRecord>();
