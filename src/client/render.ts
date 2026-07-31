@@ -22,13 +22,6 @@ const ICON = {
     "M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm.936 4.328a.75.75 0 0 1 1.5 0v2.5a.75.75 0 0 1-1.5 0ZM8 12a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z",
   pencil:
     "M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758Z",
-  /** Heart-rate line: a component's status moving up or down. */
-  pulse:
-    "M6 2c.306 0 .582.187.696.471L10 10.731l1.304-3.26A.751.751 0 0 1 12 7h3.25a.75.75 0 0 1 0 1.5h-2.742l-1.812 4.528a.751.751 0 0 1-1.392 0L6 4.77 4.696 8.03A.75.75 0 0 1 4 8.5H.75a.75.75 0 0 1 0-1.5h2.742l1.812-4.529A.75.75 0 0 1 6 2Z",
-  kebab:
-    "M8 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM1.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm13 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z",
-  smiley:
-    "M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0Zm4-1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm5 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM4.9 9.65a.75.75 0 0 1 1.05.15c.45.6 1.2 1.1 2.05 1.1s1.6-.5 2.05-1.1a.75.75 0 1 1 1.2.9A4 4 0 0 1 8 12.4a4 4 0 0 1-3.25-1.7.75.75 0 0 1 .15-1.05Z",
 } as const;
 
 function svg(path: string, size = 16): SVGSVGElement {
@@ -124,40 +117,26 @@ export function issueRow(issue: IssueSummary): HTMLLIElement {
   return row;
 }
 
-/**
- * A control that looks live and is not. Everything fake routes to /503; the
- * click handler is delegated from the document, so buttons rendered after boot
- * are covered too.
- */
-function deadButton(className: string, icon: string, label: string): HTMLButtonElement {
-  const button = el("button", `${className} dead-control`);
-  button.type = "button";
-  button.setAttribute("aria-label", label);
-  button.appendChild(svg(icon, 16));
-  return button;
-}
-
 /** A bot comment: the status update itself. */
 function statusUpdateRow(entry: TimelineEntry): HTMLElement {
   const row = el("div", "timeline-row");
-  const box = el("div", "comment-box");
+  row.appendChild(el("div", "timeline-icon avatar-icon avatar-c2"));
+
+  const box = el("div", "timeline-comment comment-box");
 
   const header = el("div", "comment-header");
-  header.appendChild(el("span", "avatar avatar-c2"));
-
+  const who = el("div");
   const name = el("a", "who", BOT_ACTOR);
   name.href = "https://www.githubstatus.com";
-  header.append(name, el("span", "role-pill bot", "bot"));
+  who.append(name, el("span", "role-pill bot", "bot"));
 
   const status = typeof entry.meta?.["status"] === "string" ? entry.meta["status"] : null;
-  header.appendChild(
+  who.appendChild(
     timeSpan(entry.createdAt, status ? `${humanizeStatus(status)} · ` : "commented "),
   );
-  if (entry.editedAt !== null) header.appendChild(el("span", "when", "· edited"));
+  if (entry.editedAt !== null) who.appendChild(el("span", "when", " · edited"));
 
-  const headerRight = el("div", "header-right");
-  headerRight.appendChild(deadButton("comment-menu", ICON.kebab, "Comment actions"));
-  header.appendChild(headerRight);
+  header.appendChild(who);
   box.appendChild(header);
 
   const body = el("div", "comment-body");
@@ -170,28 +149,18 @@ function statusUpdateRow(entry: TimelineEntry): HTMLElement {
   }
   box.appendChild(body);
 
-  const footer = el("div", "comment-footer");
-  footer.appendChild(deadButton("react-btn", ICON.smiley, "Add a reaction"));
-  box.appendChild(footer);
-
   row.appendChild(box);
   return row;
 }
 
-/** A non-comment timeline row: the small badge-plus-sentence kind. */
-function eventRow(
-  icon: string,
-  build: (target: HTMLElement) => void,
-  badge?: "open" | "closed",
-): HTMLElement {
-  const row = el("div", "timeline-event");
+/** A non-comment timeline row: the small icon-plus-sentence kind. */
+function eventRow(icon: string, build: (target: HTMLElement) => void): HTMLElement {
+  const row = el("div", "timeline-row event");
+  const iconWrap = el("div", "timeline-icon");
+  iconWrap.appendChild(svg(icon, 14));
+  row.appendChild(iconWrap);
 
-  const marker = el("span", badge ? `timeline-badge ${badge}` : "timeline-badge");
-  marker.appendChild(svg(icon, 14));
-  row.appendChild(marker);
-  row.appendChild(el("span", "avatar avatar-sm avatar-c2"));
-
-  const text = el("span", "event-text");
+  const text = el("div", "timeline-event-text");
   build(text);
   row.appendChild(text);
   return row;
@@ -212,12 +181,12 @@ export function timelineRow(entry: TimelineEntry): HTMLElement {
       return statusUpdateRow(entry);
 
     case "opened":
-      return eventRow(ICON.open, (text) => {
+      return eventRow(ICON.alert, (text) => {
         text.append(actor(), document.createTextNode(" opened this issue "), timeSpan(entry.createdAt));
       });
 
     case "component_changed":
-      return eventRow(ICON.pulse, (text) => {
+      return eventRow(ICON.alert, (text) => {
         const to = humanizeStatus(metaString(entry, "to"));
         text.append(
           el("strong", undefined, metaString(entry, "component")),
@@ -252,22 +221,14 @@ export function timelineRow(entry: TimelineEntry): HTMLElement {
       });
 
     case "closed":
-      return eventRow(
-        ICON.closed,
-        (text) => {
-          text.append(actor(), document.createTextNode(" closed this as resolved "), timeSpan(entry.createdAt));
-        },
-        "closed",
-      );
+      return eventRow(ICON.closed, (text) => {
+        text.append(actor(), document.createTextNode(" closed this as resolved "), timeSpan(entry.createdAt));
+      });
 
     case "reopened":
-      return eventRow(
-        ICON.open,
-        (text) => {
-          text.append(actor(), document.createTextNode(" reopened this "), timeSpan(entry.createdAt));
-        },
-        "open",
-      );
+      return eventRow(ICON.open, (text) => {
+        text.append(actor(), document.createTextNode(" reopened this "), timeSpan(entry.createdAt));
+      });
 
     default:
       // An event kind the client does not know about is a deploy-skew problem,

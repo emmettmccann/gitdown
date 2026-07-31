@@ -4,166 +4,114 @@
 <meta charset="UTF-8">
 <title>Issues · emmettmccann/gitdown</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/css/style.css?v=6">
+<link rel="stylesheet" href="/css/style.css?v=5">
 </head>
 <body>
 
-<header class="app-header">
-  <button class="hamburger dead-control" type="button" aria-label="Open global navigation menu">
-    <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"></path></svg>
-  </button>
+<header class="gh-header">
   <a class="logo" href="/" aria-label="Homepage">
-    <svg class="octicon" height="24" viewBox="0 0 16 16" width="24"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>
+    <svg class="octicon" height="32" viewBox="0 0 16 16" width="32"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>
   </a>
-  <div class="header-repo">
-    <a class="owner" href="https://github.com/emmettmccann" rel="noopener">emmettmccann</a>
-    <span class="sep">/</span>
-    <a class="name" href="/">gitdown</a>
-    <button class="context-caret dead-control" type="button" aria-label="Repository context">
-      <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M4.427 6.427h7.146a.25.25 0 0 1 .177.427l-3.573 3.573a.25.25 0 0 1-.354 0L4.25 6.854a.25.25 0 0 1 .177-.427Z"></path></svg>
-    </button>
-  </div>
+  <nav>
+    <button type="button">Platform ▾</button>
+    <button type="button">Solutions ▾</button>
+    <button type="button">Resources ▾</button>
+    <button type="button">Open Source ▾</button>
+    <button type="button">Enterprise ▾</button>
+    <a href="https://buymeacoffee.com/emmettmccann" rel="noopener">Pricing</a>
+  </nav>
   <div class="spacer"></div>
-  <div class="header-actions">
-    <button class="header-search dead-control" type="button">
-      <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13 6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0 .52-.09.7-.3a1 1 0 0 0 0-1.4zM3 6c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4z"></path></svg>
-      <span class="placeholder">Type <span class="kbd">/</span> to search</span>
-    </button>
-    <span class="btn-group hide-md">
-      <button class="btn-icon dead-control" type="button" aria-label="Assistant">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M7.25 1.75a.75.75 0 0 1 1.5 0V3h1.75A3.5 3.5 0 0 1 14 6.5v3A3.5 3.5 0 0 1 10.5 13h-5A3.5 3.5 0 0 1 2 9.5v-3A3.5 3.5 0 0 1 5.5 3h1.75Zm-1.5 4.5a1 1 0 1 0 0 2.5 1 1 0 0 0 0-2.5Zm4.5 0a1 1 0 1 0 0 2.5 1 1 0 0 0 0-2.5ZM.75 7a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 .75 7Zm14.5 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 15.25 7Z"></path></svg>
-      </button>
-      <button class="btn-icon btn-caret dead-control" type="button" aria-label="Assistant menu">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M4.427 6.427h7.146a.25.25 0 0 1 .177.427l-3.573 3.573a.25.25 0 0 1-.354 0L4.25 6.854a.25.25 0 0 1 .177-.427Z"></path></svg>
-      </button>
-    </span>
-    <span class="btn-group hide-sm">
-      <button class="btn-icon dead-control" type="button" aria-label="Create new…">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path></svg>
-      </button>
-      <button class="btn-icon btn-caret dead-control" type="button" aria-label="Create new menu">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M4.427 6.427h7.146a.25.25 0 0 1 .177.427l-3.573 3.573a.25.25 0 0 1-.354 0L4.25 6.854a.25.25 0 0 1 .177-.427Z"></path></svg>
-      </button>
-    </span>
-    <button class="btn-icon hide-md dead-control" type="button" aria-label="Your issues">
-      <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"></path><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"></path></svg>
-    </button>
-    <button class="btn-icon hide-md dead-control" type="button" aria-label="Your pull requests">
-      <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"></path></svg>
-    </button>
-    <a class="btn-icon hide-md" href="https://buymeacoffee.com/emmettmccann" rel="noopener" aria-label="Sponsor gitdown" title="Sponsor">
-      <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="m8 14.25.345.666a.75.75 0 0 1-.69 0l-.008-.004-.018-.01a22.06 22.06 0 0 1-3.744-2.584C2.045 10.731 0 8.35 0 5.5 0 2.836 2.086 1 4.25 1 5.797 1 7.153 1.802 8 3.02 8.847 1.802 10.203 1 11.75 1 13.914 1 16 2.836 16 5.5c0 2.85-2.045 5.231-3.885 6.818a22.066 22.066 0 0 1-3.744 2.584l-.018.01-.006.003Z"></path></svg>
-    </a>
-    <button class="btn-icon notification-dot dead-control" type="button" aria-label="Inbox">
-      <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M2.8 2.06A1.75 1.75 0 0 1 4.41 1h7.18c.7 0 1.333.417 1.61 1.06l2.74 6.395c.04.093.06.194.06.295v4.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25v-4.5c0-.101.02-.202.06-.295Zm1.61.44a.25.25 0 0 0-.23.152L1.887 8H4.75a.75.75 0 0 1 .6.3L6.625 10h2.75L10.65 8.3a.75.75 0 0 1 .6-.3h2.863L11.82 2.652a.25.25 0 0 0-.23-.152Z"></path></svg>
-    </button>
-    <button class="header-avatar avatar-me dead-control" type="button" aria-label="Your account"></button>
+  <div class="search">
+    <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13 6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0 .52-.09.7-.3a1 1 0 0 0 0-1.4zM3 6c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4z"></path></svg>
+    Search or jump to…
+  </div>
+  <div class="auth">
+    <a class="btn" href="/503">Sign in</a>
+    <a class="btn btn-invert" href="/503">Sign up</a>
   </div>
 </header>
 
-<nav class="repo-nav">
-  <a href="/503">Code</a>
-  <a class="active" href="/">Issues <span class="counter" id="issues-tab-count">–</span></a>
-  <a href="/503">Pull requests <span class="counter">0</span></a>
-  <a href="/503">Actions</a>
-  <a href="/503">Projects</a>
-  <a href="/503">Security</a>
-  <a href="/503">Insights</a>
-</nav>
+<div class="repo-header">
+  <div class="repo-title">
+    <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2H4.5a1 1 0 0 0-.98 1.2.75.75 0 1 1-1.47.3A2.5 2.5 0 0 1 2 11.5Zm10.5-1H4.5a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8Z"></path></svg>
+    <a class="owner" href="https://github.com/emmettmccann" rel="noopener">emmettmccann</a>
+    <span class="sep">/</span>
+    <a class="name" href="/">gitdown</a>
+    <span class="pill">Public</span>
+  </div>
+  <div class="repo-actions">
+    <a class="btn" href="/503"><svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M8 16a2 2 0 0 0 1.985-1.75c.017-.137-.097-.25-.235-.25h-3.5c-.138 0-.252.113-.235.25A2 2 0 0 0 8 16ZM8 1.5A3.5 3.5 0 0 0 4.5 5v2.947c0 .346-.102.683-.294.97l-1.703 2.556a.018.018 0 0 0-.003.01l.001.006c0 .002.002.004.004.006l.006.004.007.001h11.964l.007-.001.006-.004.004-.006.001-.007a.017.017 0 0 0-.003-.01l-1.703-2.554a1.75 1.75 0 0 1-.294-.97V5A3.5 3.5 0 0 0 8 1.5Z"></path></svg> Notifications</a>
+    <a class="btn" href="https://github.com/emmettmccann/gitdown" rel="noopener"><svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0Z"></path></svg> Fork <span class="pill">0</span></a>
+    <a class="btn" href="https://github.com/emmettmccann/gitdown" rel="noopener"><svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path></svg> Star <span class="pill">0</span></a>
+  </div>
+  <ul class="repo-tabs">
+    <li><a href="/503">Code</a></li>
+    <li><a class="active" href="/">Issues <span class="count" id="issues-tab-count">–</span></a></li>
+    <li><a href="/503">Pull requests <span class="count">0</span></a></li>
+    <li><a href="/503">Actions</a></li>
+    <li><a href="/503">Projects</a></li>
+    <li><a href="/503">Security</a></li>
+    <li><a href="/503">Insights</a></li>
+  </ul>
+</div>
 
-<div class="layout">
-  <aside class="side-nav">
-    <ul>
-      <li><a class="active" href="/">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"></path><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"></path></svg>
-        Issues</a></li>
-      <li><a href="/503">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M5.5 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Zm0 6c2.5 0 4.5 1.3 4.5 2.9V14H1v-1.6C1 10.8 3 9.5 5.5 9.5Zm6-6a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5Zm.2 5.5c2 0 3.3 1 3.3 2.3V14h-3.6v-1.6c0-.9-.4-1.7-1.1-2.3.4-.1.9-.1 1.4-.1Z"></path></svg>
-        Assigned to me</a></li>
-      <li><a href="/503">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758Z"></path></svg>
-        Created by me</a></li>
-      <li><a href="/503">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M8 0a8 8 0 1 0 3.7 15.1.75.75 0 1 0-.7-1.33A6.5 6.5 0 1 1 14.5 8v.75a1.25 1.25 0 0 1-2.5 0V4.75a.75.75 0 0 0-1.42-.34A3.75 3.75 0 1 0 11 12.1a2.75 2.75 0 0 0 5-1.6V8a8 8 0 0 0-8-8Zm0 5.75a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5Z"></path></svg>
-        Mentioned</a></li>
-      <li><a href="/503">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm0 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Zm.75 2.5v3.94l2.53 1.46a.75.75 0 0 1-.75 1.3L7.62 8.9A.75.75 0 0 1 7.25 8.25V4a.75.75 0 0 1 1.5 0Z"></path></svg>
-        Recent activity</a></li>
-    </ul>
-    <ul>
-      <li><a href="/503">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M8 2c-3.5 0-6.4 2.2-7.8 5.2a1.9 1.9 0 0 0 0 1.6C1.6 11.8 4.5 14 8 14s6.4-2.2 7.8-5.2a1.9 1.9 0 0 0 0-1.6C14.4 4.2 11.5 2 8 2Zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm0 1.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"></path></svg>
-        Views</a></li>
-      <li><a href="/503">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M7.75 0a.75.75 0 0 1 .75.75V2h3.634c.414 0 .814.147 1.13.414l1.542 1.302a.75.75 0 0 1 0 1.146l-1.542 1.302a1.75 1.75 0 0 1-1.13.414H8.5v9.672a.75.75 0 0 1-1.5 0V6.578H3.75A1.75 1.75 0 0 1 2 4.828V3.75C2 2.784 2.784 2 3.75 2H7V.75A.75.75 0 0 1 7.75 0Z"></path></svg>
-        Milestones</a></li>
-      <li><a href="/503">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M1 7.775V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 0 1 0 2.474l-5.026 5.026a1.75 1.75 0 0 1-2.474 0l-6.25-6.25A1.752 1.752 0 0 1 1 7.775Z"></path></svg>
-        Labels</a></li>
-    </ul>
-    <div class="side-nav-footer">
+<div class="page-layout">
+  <aside class="issues-sidebar">
+    <nav>
       <ul>
-        <li><a href="/503">
-          <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M1.75 1h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25v-8.5C0 1.784.784 1 1.75 1Z"></path></svg>
-          Feedback <span class="preview-pill">Preview</span></a></li>
-        <li><a href="/503">
-          <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M1.75 1h12.5A1.75 1.75 0 0 1 16 2.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25V2.75C0 1.784.784 1 1.75 1Zm.25 1.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25H5.5v-11Zm5 0v11h7.25a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25Z"></path></svg>
-          Collapse sidebar</a></li>
+        <li><a href="/"><strong>Issues</strong></a></li>
+        <li><a href="/503">Assigned to me</a></li>
+        <li><a href="/503">Created by me</a></li>
+        <li><a href="/503">Mentioned</a></li>
+        <li><a href="/503">Recent activity</a></li>
       </ul>
-    </div>
+      <ul>
+        <li><a href="/503">Views</a></li>
+        <li><a href="/503">Projects</a></li>
+        <li><a href="/503">Milestones</a></li>
+        <li><a href="/503">Labels</a></li>
+      </ul>
+    </nav>
   </aside>
 
-  <main class="main">
-    <div class="page-title-row">
-      <h1>All issues</h1>
-      <a class="btn btn-primary" href="/503">New issue</a>
+  <main class="issues-main">
+    <h1>All issues</h1>
+    <div class="filter-bar">
+      <input type="text" id="filter-query" value="is:issue state:open" readonly>
     </div>
 
-    <div class="search-field">
-      <span class="query" id="filter-query">is:<span class="value">issue</span> state:<span class="value">open</span></span>
-      <button class="search-submit dead-control" type="button" aria-label="Search">
-        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13 6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0 .52-.09.7-.3a1 1 0 0 0 0-1.4zM3 6c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4z"></path></svg>
-      </button>
-    </div>
-
-    <div class="issue-list-container">
-      <div class="list-toolbar">
-        <div class="state-tabs">
-          <a id="tab-open" href="/?state=open">
-            <svg class="octicon" height="16" viewBox="0 0 16 16" width="16" style="color:var(--color-open-bg)"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"></path><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"></path></svg>
-            Open <span class="counter" id="count-open">–</span></a>
-          <a id="tab-closed" href="/?state=closed">
-            <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M11.28 6.78a.75.75 0 0 0-1.06-1.06L7.25 8.69 5.78 7.22a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0l3.5-3.5Z"></path><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"></path></svg>
-            Closed <span class="counter" id="count-closed">–</span></a>
-        </div>
-        <div class="list-filters">
-          <button class="dead-control" type="button">Author <svg class="octicon caret" height="16" viewBox="0 0 16 16" width="16"><path d="M4.427 6.427h7.146a.25.25 0 0 1 .177.427l-3.573 3.573a.25.25 0 0 1-.354 0L4.25 6.854a.25.25 0 0 1 .177-.427Z"></path></svg></button>
-          <button class="dead-control" type="button">Labels <svg class="octicon caret" height="16" viewBox="0 0 16 16" width="16"><path d="M4.427 6.427h7.146a.25.25 0 0 1 .177.427l-3.573 3.573a.25.25 0 0 1-.354 0L4.25 6.854a.25.25 0 0 1 .177-.427Z"></path></svg></button>
-          <button class="dead-control" type="button">Projects <svg class="octicon caret" height="16" viewBox="0 0 16 16" width="16"><path d="M4.427 6.427h7.146a.25.25 0 0 1 .177.427l-3.573 3.573a.25.25 0 0 1-.354 0L4.25 6.854a.25.25 0 0 1 .177-.427Z"></path></svg></button>
-          <button class="dead-control" type="button">Milestones <svg class="octicon caret" height="16" viewBox="0 0 16 16" width="16"><path d="M4.427 6.427h7.146a.25.25 0 0 1 .177.427l-3.573 3.573a.25.25 0 0 1-.354 0L4.25 6.854a.25.25 0 0 1 .177-.427Z"></path></svg></button>
-          <button class="dead-control" type="button">Assignees <svg class="octicon caret" height="16" viewBox="0 0 16 16" width="16"><path d="M4.427 6.427h7.146a.25.25 0 0 1 .177.427l-3.573 3.573a.25.25 0 0 1-.354 0L4.25 6.854a.25.25 0 0 1 .177-.427Z"></path></svg></button>
-          <button class="dead-control" type="button">Types <svg class="octicon caret" height="16" viewBox="0 0 16 16" width="16"><path d="M4.427 6.427h7.146a.25.25 0 0 1 .177.427l-3.573 3.573a.25.25 0 0 1-.354 0L4.25 6.854a.25.25 0 0 1 .177-.427Z"></path></svg></button>
-          <button class="dead-control" type="button">
-            <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M0 4.75A.75.75 0 0 1 .75 4h14.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 4.75Zm0 5a.75.75 0 0 1 .75-.75h9.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 9.75Zm0 5a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1-.75-.75Z"></path></svg>
-            Newest <svg class="octicon caret" height="16" viewBox="0 0 16 16" width="16"><path d="M4.427 6.427h7.146a.25.25 0 0 1 .177.427l-3.573 3.573a.25.25 0 0 1-.354 0L4.25 6.854a.25.25 0 0 1 .177-.427Z"></path></svg></button>
-        </div>
+    <div class="issue-list-toolbar">
+      <div class="state-tabs">
+        <a id="tab-open" href="/?state=open"><svg class="octicon" height="16" viewBox="0 0 16 16" width="16" style="color:var(--color-open-bg)"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"></path><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"></path></svg> Open <span id="count-open">–</span></a>
+        <a id="tab-closed" href="/?state=closed"><svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M11.28 6.78a.75.75 0 0 0-1.06-1.06L7.25 8.69 5.78 7.22a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0l3.5-3.5Z"></path><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"></path></svg> Closed <span id="count-closed">–</span></a>
       </div>
-
-      <ul class="issue-list" id="issue-list">
-        <li class="issue-row"><div class="issue-body"><div class="issue-meta">Loading…</div></div></li>
-      </ul>
+      <div class="filters">
+        <button type="button">Author ▾</button>
+        <button type="button">Labels ▾</button>
+        <button type="button">Projects ▾</button>
+        <button type="button">Milestones ▾</button>
+        <button type="button">Assignees ▾</button>
+        <button type="button">Newest ▾</button>
+      </div>
     </div>
+
+    <ul class="issue-list" id="issue-list">
+      <li class="issue-row"><div class="issue-body"><div class="issue-meta">Loading…</div></div></li>
+    </ul>
     <div class="pager" id="pager"></div>
+
   </main>
 </div>
 
 <footer class="gh-footer">
+  <a href="/503"><svg class="octicon" height="24" viewBox="0 0 16 16" width="24"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg></a>
   <div>A parody. Not affiliated with, endorsed by, or connected to GitHub or Microsoft. Incident text is quoted from <a href="https://www.githubstatus.com">githubstatus.com</a>.</div>
   <nav>
     <ul>
-      <li><a href="https://buymeacoffee.com/emmettmccann" rel="noopener">Pricing</a></li>
       <li><a href="/503">Terms</a></li>
       <li><a href="/503">Privacy</a></li>
+      <li><a href="/503">Security</a></li>
+      <li><a href="/503">Status</a></li>
       <li><a href="/503">Docs</a></li>
       <li><a href="/503">Contact</a></li>
     </ul>
