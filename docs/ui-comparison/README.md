@@ -10,20 +10,31 @@ equivalent views on github.com.
 | `signed-in-list-before.png` / `signed-in-list-after.png` | `/?state=closed` | Signed-out chrome → signed-in |
 | `signed-in-issue-before.png` / `signed-in-issue-after.png` | `/issues/5` | Signed-out chrome → signed-in |
 | `stale-bundle-before.png` / `stale-bundle-after.png` | `/issues/8` | Deployed bundle out of step with the CSS |
+| `comment-header-before.png` / `comment-header-after.png` | `/issues/8` | Comment header flat → filled band |
 
-The `stale-bundle-*` pair is not a design change — both frames are the same
-commit's CSS. `before` is that CSS rendered against the client bundle the
-deployed site was actually serving, which predates the avatars moving inside the
-comment cards, so the timeline icons stack above the cards and the rail lines up
-with nothing. `after` is the same page once the build guarantees the two ship
-together. Reproduce `before` by building the previous bundle over the current
-tree:
+The `stale-bundle-*` pair captures the deployed issue view against the fixed
+one. `before` is `9f8baf2` exactly as gitdown.chat served it: that commit's CSS
+rendered against the client bundle actually on the edge, which predates the
+avatars moving inside the comment cards — so the timeline icons stack above the
+cards and the rail lines up with nothing. Reproduce it by putting both halves
+back:
 
 ```bash
+git show 9f8baf2:public/css/style.css > public/css/style.css
 git archive e13b6e6 src/client | tar -x -C /tmp/oldclient
 npx esbuild /tmp/oldclient/src/client/main.ts --bundle --minify \
   --format=esm --target=es2022 --outfile=public/js/app.js
 ```
+
+`after` is the same page with the bundle the build now guarantees, and with the
+comment header restored to a filled band — `9f8baf2` had dropped it on the
+grounds that the signed-in views do not have one, which the reference does not
+bear out.
+
+The `comment-header-*` pair isolates that last part, with the bundle correct on
+both sides: `before` is `main` once the bundle fix had shipped, still carrying a
+flat header, and `after` is the band restored. Both are the same 1440×700 frame
+so the header is legible without the whole thread around it.
 
 ## Reproducing them
 
