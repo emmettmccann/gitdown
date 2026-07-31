@@ -1,13 +1,15 @@
-/* Parody GitHub UI clone — hand-built to visually resemble github.com, not copied from it. */
+/* Parody GitHub UI clone — hand-built to visually resemble github.com, not copied from it.
+   Modelled on the *signed-in* views: github.com serves a different chrome to a
+   logged-in user, and that is the one this site is pretending to be. */
 
 :root {
   --color-canvas-default: #ffffff;
   --color-canvas-subtle: #f6f8fa;
   --color-canvas-inset: #f6f8fa;
-  --color-header-bg: #1f2328;
-  /* github.com puts the repo title/tabs block on --page-header-bgColor, a
-     subtle grey, rather than on the page background. */
-  --color-page-header-bg: #f6f8fa;
+  /* Signed in, the global header is on the page background rather than the dark
+     marketing bar, and the repo tab strip runs straight underneath it. */
+  --color-header-bg: #ffffff;
+  --color-page-header-bg: #ffffff;
   /* Primer's Counter background: a translucent grey so counters read the same
      on white and on the grey page header. */
   --color-neutral-muted: rgba(129, 139, 152, 0.2);
@@ -24,13 +26,22 @@
   --color-closed-bg: #8250df;
   --color-attention-subtle: #fff8c5;
   --color-btn-bg: #f6f8fa;
+  --color-btn-hover-bg: #eef1f4;
   --color-btn-border: rgba(31, 35, 40, 0.15);
   --color-btn-primary-bg: #1f883d;
   --color-btn-primary-hover-bg: #1a7f37;
+  /* A primary button that is present but not usable — the composer's Comment
+     button with nothing typed in it. */
+  --color-btn-primary-disabled-bg: #95d8a6;
   --radius: 6px;
 }
 
 * { box-sizing: border-box; }
+
+/* `hidden` has to beat any `display` a component sets, or an element the client
+   leaves hidden renders anyway. The UA rule loses to a class rule, and this
+   page has several flex components that are toggled with the attribute. */
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -55,45 +66,85 @@ svg.octicon-stroke {
   stroke-linecap: round;
 }
 
-/* ---------- Global header ---------- */
+/* ---------- Global header (signed in) ---------- */
 .gh-header {
   background: var(--color-header-bg);
-  color: #fff;
+  color: var(--color-fg-default);
   display: flex;
   align-items: center;
-  gap: 16px;
-  /* The marketing header pads to 32px at desktop widths (Primer px-lg-5), the
-     same gutter the repo header and page body use. */
-  padding: 16px 32px;
+  gap: 8px;
+  /* Shorter than the marketing bar: signed in this is a utility strip, and the
+     repo tabs sit directly under it. */
+  padding: 8px 16px;
 }
-.gh-header a { color: #fff; }
-.gh-header .logo { display: flex; }
-.gh-header nav { display: flex; gap: 16px; flex: 1; white-space: nowrap; }
-.gh-header nav button {
-  background: none; border: none; color: #d0d7de; font-size: 14px;
-  cursor: pointer; padding: 6px 0; white-space: nowrap;
-}
+.gh-header a { color: var(--color-fg-default); }
+.gh-header .logo { display: flex; color: var(--color-fg-default); }
 .gh-header .spacer { flex: 1; }
+
+/* The repo moved into the header breadcrumb, so the page below can open
+   straight onto the issue. */
+.header-repo { display: flex; align-items: center; gap: 6px; font-size: 14px; white-space: nowrap; }
+.header-repo .sep { color: var(--color-fg-muted); }
+.header-repo .name { font-weight: 600; }
+
 .gh-header .search {
-  display: flex; align-items: center; gap: 6px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; gap: 8px;
+  background: var(--color-canvas-default);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius);
-  color: #9198a1;
-  padding: 6px 10px;
+  color: var(--color-fg-muted);
+  padding: 3px 8px;
   width: 272px;
+  height: 30px;
   font-size: 14px;
 }
-/* The "/" hotkey hint sitting at the right edge of the search field. */
-.gh-header .search .hotkey {
-  margin-left: auto;
-  border: 1px solid rgba(255,255,255,0.15);
+.gh-header .search:hover { background: var(--color-canvas-subtle); }
+kbd {
+  border: 1px solid var(--color-border-default);
+  border-bottom-width: 2px;
   border-radius: 4px;
-  padding: 0 6px;
+  padding: 0 5px;
+  font-family: inherit;
   font-size: 12px;
-  line-height: 18px;
+  line-height: 16px;
+  color: var(--color-fg-muted);
 }
-.gh-header .auth { display: flex; gap: 8px; align-items: center; }
+
+/* The account cluster: assistant, create, issues, pull requests, inbox, avatar.
+   Bordered ones are the menus, borderless ones are the destinations. */
+.header-actions { display: flex; align-items: center; gap: 4px; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 2px;
+  height: 30px; min-width: 30px;
+  padding: 0 6px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--color-fg-muted);
+  cursor: pointer;
+}
+.icon-btn:hover { background: var(--color-canvas-subtle); text-decoration: none; color: var(--color-fg-default); }
+.icon-btn.bordered { border-color: var(--color-btn-border); }
+.icon-btn.bordered:hover { background: var(--color-btn-bg); }
+.icon-btn.caret-btn { height: 22px; min-width: 22px; padding: 0 2px; }
+/* A split control reads as one button with a menu, not two buttons. */
+.btn-split { display: inline-flex; }
+.btn-split > .icon-btn:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.btn-split > .icon-btn:last-child { border-top-left-radius: 0; border-bottom-left-radius: 0; margin-left: -1px; }
+.notif-btn { position: relative; }
+.notif-btn .unread-dot {
+  position: absolute; top: 2px; right: 2px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--color-accent-emphasis);
+  border: 2px solid var(--color-canvas-default);
+}
+.avatar-btn { background: none; border: none; padding: 0 0 0 4px; cursor: pointer; display: flex; }
+.avatar-me {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #b392f0;
+  display: inline-block;
+}
+
 .btn {
   display: inline-flex; align-items: center; gap: 4px;
   background: var(--color-btn-bg);
@@ -105,53 +156,30 @@ svg.octicon-stroke {
   padding: 5px 12px;
   cursor: pointer;
 }
-.btn:hover { background: #f3f4f6; text-decoration: none; }
+.btn:hover { background: var(--color-btn-hover-bg); text-decoration: none; }
 .btn-primary {
   background: var(--color-btn-primary-bg);
   border-color: rgba(31,35,40,0.15);
   color: #fff;
 }
 .btn-primary:hover { background: var(--color-btn-primary-hover-bg); }
+.btn-primary.disabled,
+.btn-primary.disabled:hover { background: var(--color-btn-primary-disabled-bg); cursor: default; }
 .btn-sm { font-size: 12px; padding: 3px 12px; }
-/* Signed-out header buttons: "Sign in" is transparent with a hairline border,
-   "Sign up" is the solid inverted one. */
-.gh-header .auth .btn {
-  background: transparent;
-  border-color: rgba(255,255,255,0.2);
-  color: #fff;
-}
-.gh-header .auth .btn:hover { background: rgba(255,255,255,0.1); }
-.gh-header .btn-invert {
-  background: #fff;
-  border-color: transparent;
-  color: #1f2328;
-}
-.gh-header .btn-invert:hover { background: #f6f8fa; }
+/* Two buttons welded into one control: an action plus its overflow menu. */
+.btn-group { display: inline-flex; }
+.btn-group > .btn:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.btn-group > .btn:last-child { border-top-left-radius: 0; border-bottom-left-radius: 0; margin-left: -1px; padding: 5px 8px; }
 
-/* ---------- Repo header / tabs ---------- */
+/* ---------- Repo tabs ---------- */
+/* No repo title block: the signed-in issue views carry the repo in the header
+   breadcrumb instead, and Star/Fork/Watch live on the Code tab. */
 .repo-header {
   background: var(--color-page-header-bg);
-  border-bottom: 1px solid var(--color-border-muted);
-  padding: 16px 32px 0;
+  border-bottom: 1px solid var(--color-border-default);
+  padding: 0 16px;
 }
-.repo-title { font-size: 20px; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
-.repo-title > .octicon { color: var(--color-fg-muted); }
-.repo-title .owner { color: var(--color-fg-muted); }
-.repo-title .sep { color: var(--color-fg-muted); }
-.repo-title .name { font-weight: 600; }
-.pill {
-  border: 1px solid var(--color-border-default);
-  border-radius: 2em;
-  font-size: 12px;
-  padding: 0 7px;
-  color: var(--color-fg-muted);
-  margin-left: 4px;
-}
-.repo-actions { float: right; display: flex; gap: 8px; margin-top: -38px; }
-/* Watch/Fork/Star are btn-sm on github.com, a size down from the page buttons. */
-.repo-actions .btn { font-size: 12px; padding: 3px 12px; }
-.repo-actions .btn .octicon { height: 14px; width: 14px; }
-.repo-tabs { display: flex; list-style: none; margin: 16px 0 0; padding: 0; gap: 8px; }
+.repo-tabs { display: flex; list-style: none; margin: 0; padding: 0; gap: 8px; }
 .repo-tabs li a {
   display: flex; align-items: center; gap: 6px;
   color: var(--color-fg-default);
@@ -170,13 +198,27 @@ svg.octicon-stroke {
 }
 
 /* ---------- Page layout ---------- */
-.page-layout { display: flex; max-width: 1280px; margin: 0 auto; padding: 24px 32px; gap: 24px; }
-.issues-sidebar { width: 220px; flex-shrink: 0; }
-.issues-sidebar nav ul { list-style: none; margin: 0; padding: 0; }
+/* The issue view is a centred column. The issues dashboard is not: its side nav
+   is pinned to the left edge of the window with a rule down its right side, and
+   the list takes whatever is left. */
+.page-layout { max-width: 1280px; margin: 0 auto; padding: 24px 16px; }
+.page-layout.with-sidebar {
+  display: flex; align-items: flex-start;
+  max-width: none; margin: 0; padding: 0;
+}
+.issues-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--color-border-default);
+  padding: 16px 12px 24px;
+}
+.issues-sidebar nav ul { list-style: none; margin: 0 0 16px; padding: 0; }
+.issues-sidebar nav ul:last-child { margin-bottom: 0; }
 .issues-sidebar nav ul li a {
+  position: relative;
   display: flex; align-items: center; gap: 8px;
   color: var(--color-fg-default);
-  padding: 6px 8px;
+  padding: 5px 8px;
   border-radius: var(--radius);
   font-size: 14px;
 }
@@ -184,12 +226,39 @@ svg.octicon-stroke {
 /* Every entry carries a leading octicon in the real sidebar; muted, so the
    label is what the eye lands on. */
 .issues-sidebar nav ul li a .octicon { color: var(--color-fg-muted); flex-shrink: 0; }
-.sidebar-divider {
-  border: 0;
-  border-top: 1px solid var(--color-border-muted);
-  margin: 8px 0;
+/* Where you are: a filled row plus an accent bar in the sidebar's gutter. */
+.issues-sidebar nav ul li a.active { background: var(--color-canvas-subtle); font-weight: 600; }
+.issues-sidebar nav ul li a.active::before {
+  content: ''; position: absolute; left: -12px; top: 3px; bottom: 3px;
+  width: 3px; border-radius: 3px;
+  background: var(--color-accent-emphasis);
+}
+/* Pinned under the nav, below a deliberate gap rather than a divider. */
+.sidebar-footer { margin-top: 40px; }
+.sidebar-footer a,
+.sidebar-footer button {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: none; border: none; text-align: left;
+  color: var(--color-fg-default);
+  padding: 5px 8px;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.sidebar-footer .octicon { color: var(--color-fg-muted); flex-shrink: 0; }
+.sidebar-footer a:hover,
+.sidebar-footer button:hover { background: var(--color-canvas-subtle); text-decoration: none; }
+.preview-badge {
+  border: 1px solid var(--color-success-fg);
+  color: var(--color-success-fg);
+  border-radius: 2em;
+  font-size: 12px;
+  padding: 0 7px;
+  margin-left: auto;
 }
 .issues-main { flex: 1; min-width: 0; }
+.page-layout.with-sidebar .issues-main { padding: 24px 20px; }
 
 /* ---------- Issue list ---------- */
 /* The list page leads with a PageHeader: title left, primary action right, and
@@ -230,16 +299,17 @@ svg.octicon-stroke {
   padding: 0 2px;
   color: #0550ae;
 }
+/* The magnifier sits inside the field rather than in a segment of its own — it
+   is the same control, not a second one. */
 .filter-input .filter-submit {
   border: none;
-  border-left: 1px solid var(--color-border-default);
-  background: var(--color-canvas-subtle);
+  background: none;
   color: var(--color-fg-muted);
   padding: 0 10px;
   cursor: pointer;
   display: flex; align-items: center;
 }
-.filter-input .filter-submit:hover { background: #eef1f4; }
+.filter-input .filter-submit:hover { color: var(--color-fg-default); }
 .issue-list-toolbar {
   display: flex; align-items: center; justify-content: space-between;
   background: var(--color-canvas-subtle);
@@ -258,11 +328,17 @@ svg.octicon-stroke {
   font-weight: 400;
   color: var(--color-fg-default);
 }
-.issue-list-toolbar .filters { display: flex; gap: 16px; }
+.issue-list-toolbar .filters { display: flex; gap: 2px; }
+/* Each filter is a menu button: no chrome until you reach for it. */
 .issue-list-toolbar .filters button {
   background: none; border: none; color: var(--color-fg-default); font-size: 14px; cursor: pointer;
   display: flex; align-items: center; gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius);
+  font-family: inherit;
 }
+.issue-list-toolbar .filters button:hover { background: var(--color-neutral-muted); }
+.issue-list-toolbar .filters .sort-button .octicon { color: var(--color-fg-muted); }
 
 .issue-list {
   list-style: none; margin: 0; padding: 0;
@@ -272,7 +348,7 @@ svg.octicon-stroke {
 }
 .issue-row {
   display: flex; align-items: flex-start; gap: 8px;
-  padding: 8px 16px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--color-border-muted);
 }
 .issue-row:last-child { border-bottom: none; }
@@ -324,25 +400,28 @@ svg.octicon-stroke {
 .comment-box {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius);
+  background: var(--color-canvas-default);
 }
+/* Signed in, the author line is not a filled bar across the top of the card —
+   it sits on the card itself, with the avatar inside the border and the comment
+   actions at the far right. */
 .comment-header {
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--color-canvas-subtle);
-  border-bottom: 1px solid var(--color-border-default);
-  border-radius: var(--radius) var(--radius) 0 0;
-  padding: 8px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  /* Matches the body's inset, so the avatar and the first line of the comment
+     share a left edge. */
+  padding: 8px 16px 0;
   font-size: 14px;
 }
 .comment-header .avatar {
-  width: 20px; height: 20px; border-radius: 50%;
+  width: 24px; height: 24px; border-radius: 50%;
   background: #d1d9e0;
   display: inline-block;
-  margin-right: 6px;
-  vertical-align: middle;
+  flex-shrink: 0;
 }
 /* The name, the bot pill and the timestamp are separate words and need to read
    as such — without this they run together. */
-.comment-header > div { display: flex; align-items: center; gap: 6px; }
+.comment-header > div { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.comment-header .comment-actions { flex-shrink: 0; }
 .comment-header .who { font-weight: 600; }
 .comment-header .when { color: var(--color-fg-muted); font-weight: 400; }
 .comment-header .owner-pill {
@@ -352,17 +431,9 @@ svg.octicon-stroke {
   padding: 0 8px;
   color: var(--color-fg-muted);
 }
-.comment-body { padding: 16px; }
-
-.signin-banner {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--color-attention-subtle);
-  border: 1px solid #d4a72c;
-  border-radius: var(--radius);
-  padding: 16px;
-  margin-top: 16px;
-  font-size: 14px;
-}
+/* Status updates routinely end in a bare incident URL. Unbroken, one of those
+   is wider than a phone and drags the whole page sideways with it. */
+.comment-body { padding: 8px 16px 16px; overflow-wrap: break-word; }
 
 .meta-section { border-bottom: 1px solid var(--color-border-muted); padding: 16px 0; }
 .meta-section:first-child { padding-top: 0; }
@@ -370,16 +441,25 @@ svg.octicon-stroke {
    carries the normal body size. */
 .meta-section h3 { font-size: 12px; font-weight: 600; color: var(--color-fg-muted); margin: 0 0 8px; }
 .meta-section .empty { color: var(--color-fg-muted); font-size: 14px; }
+/* The one section whose title carries a control of its own: Notifications. */
+.meta-section .meta-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.meta-section .customize { font-size: 12px; margin-bottom: 8px; }
+.meta-section .btn-block { width: 100%; justify-content: center; }
+.meta-section .note { color: var(--color-fg-muted); font-size: 12px; margin: 8px 0 0; }
+/* The links that close out the sidebar, outside the sectioned list. */
+.sidebar-links { padding-top: 16px; }
 
+/* Signed in, github.com serves no footer on these views. gitdown still has to
+   carry the disclaimer on every page (SPEC 10.5), so it shrinks to one line
+   rather than disappearing. */
 .gh-footer {
   border-top: 1px solid var(--color-border-muted);
-  padding: 24px;
+  padding: 16px 24px;
   text-align: center;
   color: var(--color-fg-muted);
   font-size: 12px;
 }
-.gh-footer > a:first-child { color: var(--color-fg-muted); display: inline-block; }
-.gh-footer nav ul { list-style: none; display: flex; justify-content: center; gap: 16px; padding: 0; margin: 12px 0 0; }
+.gh-footer nav ul { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; padding: 0; margin: 8px 0 0; }
 .gh-footer nav ul a { color: var(--color-fg-muted); }
 
 /* ---------- Labels (colored chips) ---------- */
@@ -399,31 +479,37 @@ a.label-chip { display: inline-block; }
 a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
 
 /* ---------- Timeline (comments + activity events) ---------- */
+/* Comment cards run the full width of the conversation column, with the avatar
+   inside them. The rail is aligned to those avatars, so the event badges
+   between the cards sit on the same line the faces do. */
 .timeline { position: relative; margin-top: 16px; }
+/* 1px card border + 16px header inset + half of a 24px avatar. */
 .timeline::before {
-  content: ''; position: absolute; left: 15px; top: 4px; bottom: 4px;
+  content: ''; position: absolute; left: 28px; top: 4px; bottom: 4px;
   width: 2px; background: var(--color-border-muted);
 }
-.timeline-row { position: relative; display: flex; gap: 12px; margin-bottom: 16px; }
+.timeline-row { position: relative; margin-bottom: 16px; }
 .timeline-icon {
   position: relative; z-index: 1; flex-shrink: 0;
   width: 30px; height: 30px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: var(--color-canvas-default);
-  border: 1px solid var(--color-border-muted);
+  background: var(--color-canvas-subtle);
+  border: 1px solid var(--color-border-default);
   color: var(--color-fg-muted);
 }
-.timeline-icon.avatar-icon { background: #d1d9e0; border: none; }
-.timeline-icon.avatar-icon img { width: 100%; height: 100%; border-radius: 50%; }
+/* Opening and closing are the two events that get a filled badge, in the same
+   green and purple as the state pill at the top of the page. */
 .timeline-icon.state-open { color: #fff; background: var(--color-open-bg); border: none; }
-.timeline-row.event { align-items: center; }
+.timeline-icon.state-closed { color: #fff; background: var(--color-closed-bg); border: none; }
+/* Indented so a 30px badge centres on the same rail the avatars sit on. */
+.timeline-row.event { display: flex; align-items: center; gap: 8px; padding-left: 14px; }
 .timeline-event-text {
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
   color: var(--color-fg-muted); font-size: 14px; padding: 4px 0;
 }
 .timeline-event-text strong { color: var(--color-fg-default); font-weight: 600; }
 .timeline-event-text .label-chip { font-size: 11px; margin-left: 0; }
-.timeline-comment { flex: 1; min-width: 0; }
+.timeline-comment { min-width: 0; }
 
 .role-pill {
   border: 1px solid var(--color-border-default);
@@ -495,10 +581,12 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
 .avatar-stack .more { font-size: 12px; color: var(--color-fg-muted); margin-left: 8px; }
 
 .sidebar-action-link {
-  display: flex; align-items: center; gap: 6px;
-  color: var(--color-fg-muted);
+  display: flex; align-items: center; gap: 8px;
+  color: var(--color-fg-default);
   font-size: 14px;
+  padding: 4px 0;
 }
+.sidebar-action-link .octicon { color: var(--color-fg-muted); }
 .sidebar-action-link:hover { color: var(--color-accent-fg); }
 
 /* ---------- Filler avatar palette (parody identicons) ---------- */
@@ -537,11 +625,10 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
   font-size: 14px;
 }
 
-/* Every visitor to a resolved incident sees this, forever (SPEC 12.1). */
+/* Every visitor to a resolved incident sees this, forever (SPEC 12.1). It sits
+   where the composer would be on a live thread. */
 .locked-notice {
-  /* 30px timeline icon + 12px gutter: line the notice up with the comment
-     cards above it rather than floating off to their right. */
-  margin: 16px 0 0 42px;
+  margin: 16px 0 0;
   padding: 12px 16px;
   border: 1px solid var(--color-border-default);
   border-radius: 6px;
@@ -591,7 +678,122 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
   margin: 0;
 }
 
+/* ---- comment composer ---- */
+/* Chrome, not a feature (SPEC 16 puts comments in step 6). It is here because a
+   signed-in issue page without one does not read as signed in. */
+
+.add-comment { margin-top: 24px; }
+.add-comment h2 { font-size: 16px; margin: 0 0 8px; }
+.composer {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius);
+  background: var(--color-canvas-default);
+}
+/* Write/Preview are folder tabs: the active one is cut out of the toolbar
+   background and joins the body below it. */
+.composer-tabs {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 8px;
+  flex-wrap: wrap;
+  background: var(--color-canvas-subtle);
+  border-bottom: 1px solid var(--color-border-default);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 8px 8px 0;
+}
+.composer-tabs .tabs { display: flex; }
+.composer-tabs .tab {
+  background: none;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 8px 16px;
+  margin-bottom: -1px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--color-fg-default);
+  cursor: pointer;
+}
+.composer-tabs .tab.active {
+  background: var(--color-canvas-default);
+  border-color: var(--color-border-default);
+  font-weight: 500;
+}
+.md-toolbar { display: flex; align-items: center; gap: 1px; padding-bottom: 8px; }
+.md-toolbar .sep { width: 1px; height: 20px; background: var(--color-border-default); margin: 0 6px; }
+.md-toolbar button {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  background: none; border: none; border-radius: var(--radius);
+  color: var(--color-fg-muted);
+  font-family: inherit;
+  cursor: pointer;
+}
+.md-toolbar button:hover { background: var(--color-neutral-muted); color: var(--color-fg-default); }
+/* A few toolbar entries are letterforms rather than glyphs, the way the real
+   heading/bold/italic/code buttons are. */
+.md-toolbar .glyph { font-weight: 600; font-size: 13px; }
+.md-toolbar .glyph.italic { font-style: italic; font-family: Georgia, "Times New Roman", serif; }
+.composer textarea {
+  display: block;
+  width: 100%;
+  min-height: 100px;
+  border: none;
+  padding: 12px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--color-fg-default);
+  background: var(--color-canvas-default);
+  cursor: pointer;
+}
+.composer textarea:focus { outline: none; }
+.composer textarea::placeholder { color: var(--color-fg-muted); }
+.composer-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap;
+  padding: 8px 12px 12px;
+}
+.composer-footer .attach {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--color-fg-muted); font-size: 12px;
+}
+.composer-footer .attach .octicon { transform: rotate(90deg); }
+.composer-actions { display: flex; align-items: center; gap: 8px; }
+.composer-note {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--color-fg-muted);
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+/* ---- narrow screens ---- */
+/* Below this the sidebars stop earning their width. `align-items` has to be
+   reset with them: on a column flex container it sizes children to max-content,
+   which is what made the issue view scroll sideways on a phone. */
+@media (max-width: 1012px) {
+  .issue-content { flex-direction: column; align-items: stretch; }
+  .issue-meta-sidebar { width: 100%; }
+  .page-layout.with-sidebar { flex-direction: column; align-items: stretch; }
+  .issues-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--color-border-default); }
+  .sidebar-footer { margin-top: 16px; }
+}
+@media (max-width: 767px) {
+  .gh-header .search { width: auto; flex: 1; min-width: 0; }
+  .gh-header .search span { display: none; }
+  /* The account cluster does not fit next to the breadcrumb on a phone; the
+     avatar is the only part of it that has to survive. Without this the header
+     is what makes the whole page scroll sideways. */
+  .header-actions > .btn-split,
+  .header-actions > .icon-btn { display: none; }
+  .issue-list-toolbar { flex-wrap: wrap; gap: 8px; }
+  .issue-list-toolbar .filters { flex-wrap: wrap; }
+  .repo-tabs { overflow-x: auto; }
+  /* The title and its buttons stop sharing a line before either has to shrink
+     below its content. */
+  .issue-detail-header,
+  .issue-detail-header .header-actions,
+  .page-title-row { flex-wrap: wrap; }
+}
+
 /* Chrome that behaves like a link should look like one. */
-.gh-header nav button,
-.issue-list-toolbar .filters button,
-.gh-header .search { cursor: pointer; }
+.gh-header .search,
+.issue-list-toolbar .filters button { cursor: pointer; }

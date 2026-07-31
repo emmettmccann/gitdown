@@ -22,6 +22,8 @@ const ICON = {
     "M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm.936 4.328a.75.75 0 0 1 1.5 0v2.5a.75.75 0 0 1-1.5 0ZM8 12a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z",
   pencil:
     "M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758Z",
+  kebab:
+    "M8 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM1.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm13 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z",
 } as const;
 
 function svg(path: string, size = 16): SVGSVGElement {
@@ -120,12 +122,14 @@ export function issueRow(issue: IssueSummary): HTMLLIElement {
 /** A bot comment: the status update itself. */
 function statusUpdateRow(entry: TimelineEntry): HTMLElement {
   const row = el("div", "timeline-row");
-  row.appendChild(el("div", "timeline-icon avatar-icon avatar-c2"));
 
   const box = el("div", "timeline-comment comment-box");
 
   const header = el("div", "comment-header");
+  // Signed in, the avatar is inside the card next to the name rather than out
+  // in the timeline gutter.
   const who = el("div");
+  who.appendChild(el("span", "avatar avatar-c2"));
   const name = el("a", "who", BOT_ACTOR);
   name.href = "https://www.githubstatus.com";
   who.append(name, el("span", "role-pill bot", "bot"));
@@ -137,6 +141,16 @@ function statusUpdateRow(entry: TimelineEntry): HTMLElement {
   if (entry.editedAt !== null) who.appendChild(el("span", "when", " · edited"));
 
   header.appendChild(who);
+
+  // Dead chrome, wired to the unicorn page with everything else.
+  const actions = el("div", "comment-actions");
+  const kebab = el("button", "icon-btn");
+  kebab.type = "button";
+  kebab.setAttribute("aria-label", "Comment options");
+  kebab.appendChild(svg(ICON.kebab));
+  actions.appendChild(kebab);
+  header.appendChild(actions);
+
   box.appendChild(header);
 
   const body = el("div", "comment-body");
@@ -153,10 +167,20 @@ function statusUpdateRow(entry: TimelineEntry): HTMLElement {
   return row;
 }
 
-/** A non-comment timeline row: the small icon-plus-sentence kind. */
-function eventRow(icon: string, build: (target: HTMLElement) => void): HTMLElement {
+/**
+ * A non-comment timeline row: the small icon-plus-sentence kind.
+ *
+ * `badge` fills the icon the way the state pill at the top of the page is
+ * filled — reserved for opening and closing, so those two read as the events
+ * that bracket the thread rather than as more label churn.
+ */
+function eventRow(
+  icon: string,
+  build: (target: HTMLElement) => void,
+  badge?: "state-open" | "state-closed",
+): HTMLElement {
   const row = el("div", "timeline-row event");
-  const iconWrap = el("div", "timeline-icon");
+  const iconWrap = el("div", badge ? `timeline-icon ${badge}` : "timeline-icon");
   iconWrap.appendChild(svg(icon, 14));
   row.appendChild(iconWrap);
 
@@ -181,9 +205,13 @@ export function timelineRow(entry: TimelineEntry): HTMLElement {
       return statusUpdateRow(entry);
 
     case "opened":
-      return eventRow(ICON.alert, (text) => {
-        text.append(actor(), document.createTextNode(" opened this issue "), timeSpan(entry.createdAt));
-      });
+      return eventRow(
+        ICON.open,
+        (text) => {
+          text.append(actor(), document.createTextNode(" opened this issue "), timeSpan(entry.createdAt));
+        },
+        "state-open",
+      );
 
     case "component_changed":
       return eventRow(ICON.alert, (text) => {
@@ -221,14 +249,22 @@ export function timelineRow(entry: TimelineEntry): HTMLElement {
       });
 
     case "closed":
-      return eventRow(ICON.closed, (text) => {
-        text.append(actor(), document.createTextNode(" closed this as resolved "), timeSpan(entry.createdAt));
-      });
+      return eventRow(
+        ICON.closed,
+        (text) => {
+          text.append(actor(), document.createTextNode(" closed this as resolved "), timeSpan(entry.createdAt));
+        },
+        "state-closed",
+      );
 
     case "reopened":
-      return eventRow(ICON.open, (text) => {
-        text.append(actor(), document.createTextNode(" reopened this "), timeSpan(entry.createdAt));
-      });
+      return eventRow(
+        ICON.open,
+        (text) => {
+          text.append(actor(), document.createTextNode(" reopened this "), timeSpan(entry.createdAt));
+        },
+        "state-open",
+      );
 
     default:
       // An event kind the client does not know about is a deploy-skew problem,

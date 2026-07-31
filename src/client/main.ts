@@ -168,9 +168,13 @@ async function initIssueDetail(): Promise<void> {
 
   let cursor = issue.cursor;
   const locked = requireElement("locked-notice");
+  const composer = document.getElementById("add-comment");
 
+  // The composer and the locked notice are the same slot: a live thread offers
+  // a reply, a resolved one explains why it cannot (SPEC 9.3).
   const markClosed = () => {
     locked.hidden = false;
+    if (composer) composer.hidden = true;
     badge.replaceChildren(stateBadge("closed"));
   };
 
@@ -178,6 +182,8 @@ async function initIssueDetail(): Promise<void> {
     markClosed();
     return; // frozen forever: nothing to poll
   }
+
+  if (composer) composer.hidden = false;
 
   startPolling(async () => {
     const update = await fetchTimeline(number, cursor);
@@ -210,22 +216,32 @@ function renderLabels(labels: string[]): void {
 // ------------------------------------------------------------- dead chrome
 
 /**
- * The page is dense with controls that look interactive and are not: nav
- * dropdowns, the search box, the filter menus. They are <button>/<div>, so an
- * href cannot cover them — send them to the same place the dead links go.
+ * The page is dense with controls that look interactive and are not: the header
+ * icon cluster, the search box, the filter menus, the composer. They are
+ * <button>/<div>/<textarea>, so an href cannot cover them — send them to the
+ * same place the dead links go.
+ *
+ * Delegated from the document rather than bound per element, so the controls
+ * the timeline renders after boot (the per-comment kebabs) are covered too.
  */
-function wireDeadChrome(): void {
-  const selectors = [
-    ".gh-header nav button",
-    ".issue-list-toolbar .filters button",
-    ".gh-header .search",
-  ].join(", ");
+const DEAD_CHROME_SELECTOR = [
+  ".gh-header button",
+  ".gh-header .search",
+  ".issue-list-toolbar .filters button",
+  ".sidebar-footer button",
+  ".meta-section button",
+  ".comment-actions button",
+  ".issue-detail-header button",
+  ".composer button",
+  ".composer textarea",
+].join(", ");
 
-  for (const element of document.querySelectorAll(selectors)) {
-    element.addEventListener("click", () => {
-      location.href = "/503";
-    });
-  }
+function wireDeadChrome(): void {
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (target.closest(DEAD_CHROME_SELECTOR)) location.href = "/503";
+  });
 }
 
 // --------------------------------------------------------------------- boot
