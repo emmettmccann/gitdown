@@ -76,6 +76,6 @@ test/           fixtures are real recorded payloads
 
 ## Status
 
-Ingestion, the read API, and the front-end work — it is a live, browsable mirror of GitHub's status page. Still to come: comments, reactions, and abuse controls. See the build order in [SPEC.md](SPEC.md#16-build-order).
+Ingestion, the read API, and the front-end work — it is a live, browsable mirror of GitHub's status page. Still to come: comments, reactions, and abuse controls. The comment box and reaction buttons on an open issue are chrome only — like the rest of the dead controls, they go to the unicorn page. See the build order in [SPEC.md](SPEC.md#16-build-order).
 
 Not affiliated with, endorsed by, or connected to GitHub or Microsoft.

@@ -45,7 +45,7 @@ async function initIssueList(): Promise<void> {
 
   document.getElementById("tab-open")?.classList.toggle("active", state === "open");
   document.getElementById("tab-closed")?.classList.toggle("active", state === "closed");
-  setText("filter-query", `is:issue state:${state}`);
+  renderQuery(state);
 
   let result;
   try {
@@ -78,6 +78,30 @@ async function initIssueList(): Promise<void> {
   }
 
   renderPager(state, page, result.hasMore);
+}
+
+/**
+ * The search box apes GitHub's syntax highlighting: qualifiers stay plain, the
+ * values they match go blue. It is a <span>, not an <input>, precisely so the
+ * two halves can be coloured differently.
+ */
+function renderQuery(state: IssueState): void {
+  const field = document.getElementById("filter-query");
+  if (!field) return;
+
+  const value = (text: string) => {
+    const span = document.createElement("span");
+    span.className = "value";
+    span.textContent = text;
+    return span;
+  };
+
+  field.replaceChildren(
+    document.createTextNode("is:"),
+    value("issue"),
+    document.createTextNode(" state:"),
+    value(state),
+  );
 }
 
 function renderPager(state: IssueState, page: number, hasMore: boolean): void {
@@ -143,9 +167,12 @@ async function initIssueDetail(): Promise<void> {
 
   let cursor = issue.cursor;
   const locked = requireElement("locked-notice");
+  const composer = document.getElementById("composer");
 
   const markClosed = () => {
     locked.hidden = false;
+    // A resolved incident is frozen, so the comment box goes away with it.
+    if (composer) composer.hidden = true;
     badge.replaceChildren(stateBadge("closed"));
   };
 
@@ -170,28 +197,36 @@ async function initIssueDetail(): Promise<void> {
 function renderLabels(labels: string[]): void {
   const container = document.getElementById("issue-labels");
   if (!container) return;
+
+  if (labels.length === 0) {
+    const empty = document.createElement("span");
+    empty.className = "empty";
+    empty.textContent = "None yet";
+    container.replaceChildren(empty);
+    return;
+  }
   container.replaceChildren(...labels.map(labelChip));
 }
 
 // ------------------------------------------------------------- dead chrome
 
 /**
- * The page is dense with controls that look interactive and are not: nav
- * dropdowns, the search box, the filter menus. They are <button>/<div>, so an
- * href cannot cover them — send them to the same place the dead links go.
+ * The page is dense with controls that look interactive and are not: the
+ * search box, the filter menus, the comment composer, the header icons. They
+ * are <button>s, so an href cannot cover them — send them to the same place
+ * the dead links go.
+ *
+ * Delegated from the document rather than bound per element, because the
+ * timeline renders its own fake controls long after boot has run.
  */
 function wireDeadChrome(): void {
-  const selectors = [
-    ".gh-header nav button",
-    ".issue-list-toolbar .filters button",
-    ".gh-header .search",
-  ].join(", ");
-
-  for (const element of document.querySelectorAll(selectors)) {
-    element.addEventListener("click", () => {
-      location.href = "/503";
-    });
-  }
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) return;
+    const control = event.target.closest(".dead-control");
+    // Anchors already point at /503 themselves; only the buttons need a nudge.
+    if (!control || control instanceof HTMLAnchorElement) return;
+    location.href = "/503";
+  });
 }
 
 // --------------------------------------------------------------------- boot
