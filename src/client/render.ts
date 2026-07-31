@@ -10,7 +10,7 @@ import type { IssueSummary, TimelineEntry } from "../shared/api.js";
 import { renderBody } from "./text.js";
 import { exactTime, humanizeStatus, relativeTime } from "./time.js";
 
-export const BOT_ACTOR = "gitdownstatus";
+export const BOT_ACTOR = "githubstatus";
 
 const ICON = {
   open: "M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z",

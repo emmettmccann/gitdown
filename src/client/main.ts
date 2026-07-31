@@ -6,6 +6,7 @@ import { fetchIssue, fetchIssues, fetchTimeline } from "./api.js";
 import { BOT_ACTOR, issueRow, labelChip, stateBadge, timelineRow } from "./render.js";
 import { startPolling } from "./poll.js";
 import { relativeTime } from "./time.js";
+import { randomQuip } from "./quips.js";
 import type { IssueState } from "../shared/api.js";
 
 /** Live threads move on the order of minutes; 5s feels instant enough. */
@@ -172,9 +173,40 @@ function renderLabels(labels: string[]): void {
   container.replaceChildren(...labels.map(labelChip));
 }
 
+// ------------------------------------------------------------- dead chrome
+
+/**
+ * The page is dense with controls that look interactive and are not: nav
+ * dropdowns, the search box, the filter menus. They are <button>/<div>, so an
+ * href cannot cover them — send them to the same place the dead links go.
+ */
+function wireDeadChrome(): void {
+  const selectors = [
+    ".gh-header nav button",
+    ".issue-list-toolbar .filters button",
+    ".gh-header .search",
+  ].join(", ");
+
+  for (const element of document.querySelectorAll(selectors)) {
+    element.addEventListener("click", () => {
+      location.href = "/503";
+    });
+  }
+}
+
 // --------------------------------------------------------------------- boot
 
 function boot(): void {
+  wireDeadChrome();
+
+  const quip = document.getElementById("quip");
+  if (quip) {
+    // Chosen per page load rather than baked into the HTML, so the asset stays
+    // cacheable and a refresh still gets you a different one.
+    quip.textContent = randomQuip();
+    return;
+  }
+
   if (document.getElementById("issue-list")) {
     void initIssueList();
   } else if (document.getElementById("timeline")) {

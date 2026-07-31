@@ -15,7 +15,7 @@
     // Without this the asset router claims /issues/6 before the Worker sees it
     // and redirects to /issue. These two prefixes always invoke the Worker;
     // everything else (CSS, JS, images) is still served free and uncounted.
-    "run_worker_first": ["/issues/*", "/api/*"]
+    "run_worker_first": ["/issues/*", "/api/*", "/503"]
   },
 
   // Statuspage incidents move on the order of minutes; one minute is the

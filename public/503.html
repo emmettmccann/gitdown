@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Issue · emmettmccann/gitdown</title>
+<title>Unicorn · emmettmccann/gitdown</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="/css/style.css?v=5">
 </head>
@@ -46,7 +46,7 @@
   </div>
   <ul class="repo-tabs">
     <li><a href="/503">Code</a></li>
-    <li><a class="active" href="/">Issues</a></li>
+    <li><a class="active" href="/">Issues <span class="count" id="issues-tab-count">–</span></a></li>
     <li><a href="/503">Pull requests <span class="count">0</span></a></li>
     <li><a href="/503">Actions</a></li>
     <li><a href="/503">Projects</a></li>
@@ -55,48 +55,84 @@
   </ul>
 </div>
 
-<div class="page-layout">
-  <main class="issues-main" style="max-width:100%;">
-    <div class="issue-detail-header">
-      <h1><span id="issue-title">Loading…</span> <span class="issue-number" id="issue-number"></span></h1>
-      <a class="btn" href="https://www.githubstatus.com">Real status page ↗</a>
-    </div>
-    <div id="issue-state"></div>
-    <div class="issue-subtitle" id="issue-subtitle"></div>
+<main class="oops">
+  <!--
+    An homage to GitHub's unicorn error page, drawn from scratch: original
+    artwork rather than their asset, for the same trademark reason the rest of
+    the site avoids shipping GitHub's marks.
+  -->
+  <svg class="unicorn" viewBox="0 0 320 260" role="img" aria-label="A unicorn, lying down, unbothered">
+    <defs>
+      <linearGradient id="mane" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%"   stop-color="#ff7b72"/>
+        <stop offset="25%"  stop-color="#ffa657"/>
+        <stop offset="50%"  stop-color="#d2a8ff"/>
+        <stop offset="75%"  stop-color="#79c0ff"/>
+        <stop offset="100%" stop-color="#7ee787"/>
+      </linearGradient>
+      <linearGradient id="horn" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%"   stop-color="#e3b341"/>
+        <stop offset="100%" stop-color="#ffd782"/>
+      </linearGradient>
+    </defs>
 
-    <div class="issue-content">
-      <div class="issue-conversation">
-        <div class="timeline" id="timeline">
-          <div class="timeline-row event">
-            <div class="timeline-event-text">Loading…</div>
-          </div>
-        </div>
+    <ellipse cx="168" cy="236" rx="120" ry="12" fill="#1f2328" opacity="0.07"/>
 
-        <div class="locked-notice" id="locked-notice" hidden>
-          <strong>This conversation has been locked.</strong>
-          The incident is resolved, so there is nothing left to complain about.
-        </div>
-      </div>
+    <!-- tail -->
+    <path d="M250 170 C292 158 300 124 286 100 C302 132 296 174 252 190 Z" fill="url(#mane)"/>
 
-      <aside class="issue-meta-sidebar">
-        <div class="meta-section">
-          <h3>Labels</h3>
-          <div id="issue-labels"></div>
-        </div>
-        <div class="meta-section">
-          <h3>Source</h3>
-          <a id="issue-source" class="sidebar-action-link" href="https://www.githubstatus.com" hidden>
-            View on githubstatus.com
-          </a>
-        </div>
-        <div class="meta-section">
-          <h3>Participants</h3>
-          <div class="avatar-stack"><span class="avatar-sm avatar-c2" title="githubstatus"></span></div>
-        </div>
-      </aside>
-    </div>
-  </main>
-</div>
+    <!-- body, lying down -->
+    <path d="M104 196 C104 156 136 132 178 132 C226 132 258 156 258 190
+             C258 206 246 214 226 214 L128 214 C112 214 104 208 104 196 Z"
+          fill="#f0f3f6" stroke="#d1d9e0" stroke-width="3"/>
+
+    <!-- folded foreleg -->
+    <path d="M132 214 C126 198 138 188 158 190 C176 192 184 202 182 214 Z"
+          fill="#e6ebf1" stroke="#d1d9e0" stroke-width="3"/>
+
+    <!-- neck -->
+    <path d="M116 198 C104 168 104 132 118 106 L162 118 C156 146 158 176 168 198 Z"
+          fill="#f0f3f6" stroke="#d1d9e0" stroke-width="3"/>
+
+    <!-- muzzle, drawn before the head so the join is hidden rather than seamed -->
+    <path d="M78 74 C58 74 48 82 48 91 C48 100 60 105 74 101 C84 98 88 86 84 78 Z"
+          fill="#f6f8fa" stroke="#d1d9e0" stroke-width="3"/>
+
+    <!-- head -->
+    <path d="M118 110 C96 108 78 96 70 78 C64 64 70 50 84 44
+             C100 37 122 40 134 52 C146 64 150 84 144 100
+             C140 110 130 112 118 110 Z"
+          fill="#f6f8fa" stroke="#d1d9e0" stroke-width="3"/>
+    <circle cx="58" cy="89" r="3.2" fill="#59636e"/>
+
+    <!-- closed eye: it is not worried about this -->
+    <path d="M92 68 C98 74 106 74 112 68" fill="none" stroke="#1f2328"
+          stroke-width="3.5" stroke-linecap="round"/>
+
+    <!-- ear -->
+    <path d="M126 44 L134 20 L148 42 Z" fill="#f6f8fa" stroke="#d1d9e0" stroke-width="3"
+          stroke-linejoin="round"/>
+
+    <!-- horn -->
+    <path d="M96 40 L110 2 L120 42 Z" fill="url(#horn)" stroke="#c99a2e"
+          stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M101 30 L116 26 M104 18 L114 15" stroke="#c99a2e" stroke-width="2.5"
+          stroke-linecap="round"/>
+
+    <!-- mane -->
+    <path d="M132 46 C158 52 166 76 158 100 C152 120 152 142 160 160
+             C142 150 134 126 138 102 C141 82 138 62 126 52 Z"
+          fill="url(#mane)"/>
+    <path d="M120 104 C138 112 144 132 140 156 C132 138 126 122 114 114 Z"
+          fill="url(#mane)" opacity="0.85"/>
+  </svg>
+
+  <p class="quip" id="quip">You really thought the links would work?</p>
+  <p class="oops-sub">
+    Nothing here is real except the outage data.
+    <a href="/">Back to the issues</a>.
+  </p>
+</main>
 
 <footer class="gh-footer">
   <a href="/503"><svg class="octicon" height="24" viewBox="0 0 16 16" width="24"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg></a>

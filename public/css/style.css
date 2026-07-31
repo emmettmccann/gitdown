@@ -442,3 +442,42 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
 /* Which state tab is selected. Inactive is muted; active keeps full contrast. */
 .issue-list-toolbar .state-tabs a { color: var(--color-fg-muted); font-weight: 400; }
 .issue-list-toolbar .state-tabs a.active { color: var(--color-fg-default); font-weight: 600; }
+
+/* ---- broken-link page ---- */
+
+.oops {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 64px 24px 96px;
+  text-align: center;
+}
+
+.oops .unicorn {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  margin-bottom: 24px;
+}
+
+.oops .quip {
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 600;
+  margin: 0 0 12px;
+  /* Quips vary a lot in length; reserve room so the layout does not jump when
+     one is swapped in on load. */
+  min-height: 2.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.oops .oops-sub {
+  color: var(--color-fg-muted);
+  margin: 0;
+}
+
+/* Chrome that behaves like a link should look like one. */
+.gh-header nav button,
+.issue-list-toolbar .filters button,
+.gh-header .search { cursor: pointer; }

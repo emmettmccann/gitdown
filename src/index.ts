@@ -33,15 +33,34 @@ export default {
       return env.ASSETS.fetch(new Request(new URL("/issue", request.url), request));
     }
 
+    // The joke page is linked to deliberately from every dead control, so it
+    // gets the status code it is named after rather than a 200.
+    if (pathname === "/503") {
+      return oopsPage(request, env, 503);
+    }
+
     // Anything else that matched a static asset never reached this handler, so
-    // a request here really is a miss.
-    return new Response("Not found", { status: 404 });
+    // a request here really is a miss — and a real miss deserves the unicorn
+    // just as much as a decorative one.
+    return oopsPage(request, env, 404);
   },
 
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(runIngestion(env));
   },
 } satisfies ExportedHandler<Env>;
+
+/**
+ * Serves the unicorn page under a chosen status code.
+ *
+ * Asked for "/503" without the extension for the same reason as the issue
+ * shell: the asset router redirects extension-ful URLs to the extensionless
+ * form, and that redirect would reach the browser instead of the page.
+ */
+async function oopsPage(request: Request, env: Env, status: number): Promise<Response> {
+  const asset = await env.ASSETS.fetch(new Request(new URL("/503", request.url), request));
+  return new Response(asset.body, { status, headers: asset.headers });
+}
 
 async function runIngestion(env: Env): Promise<void> {
   const store = new D1IssueStore(env.DB);

@@ -18,7 +18,7 @@ import type { IssueState } from "../shared/api.js";
 export type { IssueState };
 
 /** Every bot-authored row is attributed to the status page itself. */
-export const BOT_ACTOR = "gitdownstatus";
+export const BOT_ACTOR = "githubstatus";
 
 /**
  * What we already believe about an incident, as loaded from storage. This is
