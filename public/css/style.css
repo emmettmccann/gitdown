@@ -402,14 +402,20 @@ kbd {
   border-radius: var(--radius);
   background: var(--color-canvas-default);
 }
-/* Signed in, the author line is not a filled bar across the top of the card —
-   it sits on the card itself, with the avatar inside the border and the comment
-   actions at the far right. */
+/* The author line is a filled bar across the top of the card, divided from the
+   body — the same band the composer's Write/Preview strip uses. The avatar sits
+   inside it and the comment actions sit at the far right.
+
+   The fill is inside a 1px border, so it needs a radius 1px tighter than the
+   card's or its corners cut outside the border it is nested in. */
 .comment-header {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: var(--color-canvas-subtle);
+  border-bottom: 1px solid var(--color-border-default);
+  border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0;
   /* Matches the body's inset, so the avatar and the first line of the comment
      share a left edge. */
-  padding: 8px 16px 0;
+  padding: 8px 16px;
   font-size: 14px;
 }
 .comment-header .avatar {
@@ -422,7 +428,12 @@ kbd {
    as such — without this they run together. */
 .comment-header > div { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .comment-header .comment-actions { flex-shrink: 0; }
-.comment-header .who { font-weight: 600; }
+/* `.icon-btn` is sized for the global header, and at 30px it, not the avatar,
+   would set the height of the band. */
+.comment-header .comment-actions .icon-btn { height: 24px; min-width: 24px; }
+/* The author of a comment is not a blue link on github.com: the name carries
+   its weight, and the blue is saved for the links inside the comment. */
+.comment-header .who { font-weight: 600; color: var(--color-fg-default); }
 .comment-header .when { color: var(--color-fg-muted); font-weight: 400; }
 .comment-header .owner-pill {
   border: 1px solid var(--color-border-default);
@@ -433,7 +444,7 @@ kbd {
 }
 /* Status updates routinely end in a bare incident URL. Unbroken, one of those
    is wider than a phone and drags the whole page sideways with it. */
-.comment-body { padding: 8px 16px 16px; overflow-wrap: break-word; }
+.comment-body { padding: 16px; overflow-wrap: break-word; }
 
 .meta-section { border-bottom: 1px solid var(--color-border-muted); padding: 16px 0; }
 .meta-section:first-child { padding-top: 0; }
