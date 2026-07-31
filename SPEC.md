@@ -174,15 +174,15 @@ The mapping is a gift: impact escalation genuinely renders as *"githubstatus add
 Ingestion targets an interface, not a database:
 
 ```ts
-interface IssueSink {
-  openIssue(incident: Incident): Promise<IssueRef>
-  addUpdate(ref: IssueRef, update: IncidentUpdate): Promise<void>
-  setLabels(ref: IssueRef, labels: string[]): Promise<void>
-  rename(ref: IssueRef, title: string): Promise<void>
-  closeIssue(ref: IssueRef): Promise<void>
-  reopenIssue(ref: IssueRef): Promise<void>
+interface IssueStore {
+  loadByIncidentId(incidentId: string): Promise<StoredIssue | null>
+  apply(change: IssueChange): Promise<void>
+  getSyncState(key: string): Promise<string | null>
+  setSyncState(key: string, value: string): Promise<void>
 }
 ```
+
+**Implementation note (revised during step 2).** This originally specified granular methods — `openIssue`, `addUpdate`, `setLabels`, `rename`, `closeIssue`, `reopenIssue`. The built version instead has `diffIncident()` compute a **change set** (`append` / `amend` / `remove` / `patch`) which the store applies in one call. Two reasons: computing what changed is pure and applying it is I/O, so the entire diffing behaviour is testable with no database at all; and a backend applies one change set in one transaction rather than being driven through six calls it must stitch together atomically. Granular sinks remain expressible — `GitHubSink` just translates a change set into REST calls.
 
 **`GitHubSink`** — posts to the real `gitdown` repo via the REST API as a bot (fine-grained PAT or GitHub App, `issues: write`). ~150 lines. Build this **first**: it proves the poller, the diffing, and the idempotency logic end-to-end in an afternoon, against a UI you don't have to build. Keep it afterward as a mirror and durable archive.
 
