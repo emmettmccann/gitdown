@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+  <!-- gitdown. currentColor is resolved here rather than inherited, because a
+       favicon has no CSS context to inherit from. -->
+  <style>svg{color:#1f2328}@media (prefers-color-scheme:dark){svg{color:#f0f6fc}}</style>
+  <circle cx="8" cy="2.8" r="2"/><path d="M8 4.8v5.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4.4 9.6 8 13.6l3.6-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
