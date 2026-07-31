@@ -46,6 +46,14 @@ a { color: var(--color-accent-fg); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 svg.octicon { fill: currentColor; vertical-align: text-bottom; }
+/* A few glyphs (the "@" of Mentioned) read far better drawn as strokes than
+   as a filled outline. */
+svg.octicon-stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
 
 /* ---------- Global header ---------- */
 .gh-header {
@@ -205,16 +213,23 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
   overflow: hidden;
   background: var(--color-canvas-default);
 }
-.filter-input input {
+/* The query is tokenised the way the real search field renders it: keys plain,
+   ":" muted, values on a tinted chip. */
+.filter-query {
   flex: 1; min-width: 0;
-  border: none;
-  background: transparent;
   padding: 5px 12px;
   font-size: 14px;
-  color: var(--color-fg-default);
-  font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.filter-input input:focus { outline: none; }
+.filter-query .filter-delim { color: var(--color-fg-muted); }
+.filter-query .filter-value {
+  background: #ddf4ff;
+  border-radius: 4px;
+  padding: 0 2px;
+  color: #0550ae;
+}
 .filter-input .filter-submit {
   border: none;
   border-left: 1px solid var(--color-border-default);
@@ -302,7 +317,7 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
 }
 .state-badge.closed { background: var(--color-closed-bg); }
 
-.issue-content { display: flex; gap: 24px; }
+.issue-content { display: flex; gap: 32px; }
 .issue-conversation { flex: 1; min-width: 0; }
 .issue-meta-sidebar { width: 296px; flex-shrink: 0; }
 
@@ -325,6 +340,9 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
   margin-right: 6px;
   vertical-align: middle;
 }
+/* The name, the bot pill and the timestamp are separate words and need to read
+   as such — without this they run together. */
+.comment-header > div { display: flex; align-items: center; gap: 6px; }
 .comment-header .who { font-weight: 600; }
 .comment-header .when { color: var(--color-fg-muted); font-weight: 400; }
 .comment-header .owner-pill {
@@ -365,14 +383,18 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
 .gh-footer nav ul a { color: var(--color-fg-muted); }
 
 /* ---------- Labels (colored chips) ---------- */
-.label-chip.label-red { background: #ffe0dd; color: #82061c; }
-.label-chip.label-gray { background: #eeeeee; color: #24292f; }
-.label-chip.label-purple { background: #e3d6fc; color: #4b2b82; }
-.label-chip.label-blue { background: #ddf2ff; color: #0a3069; }
+/* Each chip is a tinted fill plus a same-hue border, the way issue labels are
+   drawn on github.com — the border is what stops pale labels from dissolving
+   into the row. */
+.label-chip { border: 1px solid transparent; }
+.label-chip.label-red { background: #ffe0dd; border-color: #ffb3ab; color: #82061c; }
+.label-chip.label-gray { background: #eeeeee; border-color: #d0d7de; color: #24292f; }
+.label-chip.label-purple { background: #e3d6fc; border-color: #c4a8f5; color: #4b2b82; }
+.label-chip.label-blue { background: #ddf2ff; border-color: #a5d8ff; color: #0a3069; }
 /* Impact levels, mirroring githubstatus.com's own severity colours. */
-.label-chip.label-orange { background: #ffe7d1; color: #6b2e00; }
-.label-chip.label-yellow { background: #fff5cc; color: #6b5000; }
-.label-chip.label-green { background: #d6f5d6; color: #0f5d1f; }
+.label-chip.label-orange { background: #ffe7d1; border-color: #ffc48f; color: #6b2e00; }
+.label-chip.label-yellow { background: #fff5cc; border-color: #f0d78c; color: #6b5000; }
+.label-chip.label-green { background: #d6f5d6; border-color: #a3e0a3; color: #0f5d1f; }
 a.label-chip { display: inline-block; }
 a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
 
@@ -397,7 +419,7 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
 .timeline-row.event { align-items: center; }
 .timeline-event-text {
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-  color: var(--color-fg-muted); font-size: 12px; padding: 4px 0;
+  color: var(--color-fg-muted); font-size: 14px; padding: 4px 0;
 }
 .timeline-event-text strong { color: var(--color-fg-default); font-weight: 600; }
 .timeline-event-text .label-chip { font-size: 11px; margin-left: 0; }
@@ -517,7 +539,9 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
 
 /* Every visitor to a resolved incident sees this, forever (SPEC 12.1). */
 .locked-notice {
-  margin: 16px 0 0 56px;
+  /* 30px timeline icon + 12px gutter: line the notice up with the comment
+     cards above it rather than floating off to their right. */
+  margin: 16px 0 0 42px;
   padding: 12px 16px;
   border: 1px solid var(--color-border-default);
   border-radius: 6px;

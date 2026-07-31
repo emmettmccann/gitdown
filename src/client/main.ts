@@ -21,10 +21,7 @@ function requireElement<T extends HTMLElement>(id: string): T {
 function setText(id: string, text: string): void {
   const element = document.getElementById(id);
   if (!element) return;
-  // An <input> shows its value, not its text content; setting textContent on
-  // one silently does nothing.
-  if (element instanceof HTMLInputElement) element.value = text;
-  else element.textContent = text;
+  element.textContent = text;
 }
 
 function showFailure(target: HTMLElement, message: string): void {
@@ -45,7 +42,7 @@ async function initIssueList(): Promise<void> {
 
   document.getElementById("tab-open")?.classList.toggle("active", state === "open");
   document.getElementById("tab-closed")?.classList.toggle("active", state === "closed");
-  setText("filter-query", `is:issue state:${state}`);
+  renderFilterQuery(state);
 
   let result;
   try {
@@ -78,6 +75,34 @@ async function initIssueList(): Promise<void> {
   }
 
   renderPager(state, page, result.hasMore);
+}
+
+/**
+ * Paints `is:issue state:<state>` as highlighted tokens rather than flat text,
+ * which is how the real search field renders a parsed query.
+ */
+function renderFilterQuery(state: IssueState): void {
+  const container = document.getElementById("filter-query");
+  if (!container) return;
+
+  const token = (className: string, text: string) => {
+    const span = document.createElement("span");
+    span.className = className;
+    span.textContent = text;
+    return span;
+  };
+
+  const pair = (key: string, value: string) => [
+    token("filter-key", key),
+    token("filter-delim", ":"),
+    token("filter-value", value),
+  ];
+
+  container.replaceChildren(
+    ...pair("is", "issue"),
+    document.createTextNode(" "),
+    ...pair("state", state),
+  );
 }
 
 function renderPager(state: IssueState, page: number, hasMore: boolean): void {
