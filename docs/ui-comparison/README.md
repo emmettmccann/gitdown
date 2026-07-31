@@ -9,6 +9,21 @@ equivalent views on github.com.
 | `gitdown-issue-before.png` / `gitdown-issue-after.png` | `/issues/22` | Closer to github.com |
 | `signed-in-list-before.png` / `signed-in-list-after.png` | `/?state=closed` | Signed-out chrome → signed-in |
 | `signed-in-issue-before.png` / `signed-in-issue-after.png` | `/issues/5` | Signed-out chrome → signed-in |
+| `stale-bundle-before.png` / `stale-bundle-after.png` | `/issues/8` | Deployed bundle out of step with the CSS |
+
+The `stale-bundle-*` pair is not a design change — both frames are the same
+commit's CSS. `before` is that CSS rendered against the client bundle the
+deployed site was actually serving, which predates the avatars moving inside the
+comment cards, so the timeline icons stack above the cards and the rail lines up
+with nothing. `after` is the same page once the build guarantees the two ship
+together. Reproduce `before` by building the previous bundle over the current
+tree:
+
+```bash
+git archive e13b6e6 src/client | tar -x -C /tmp/oldclient
+npx esbuild /tmp/oldclient/src/client/main.ts --bundle --minify \
+  --format=esm --target=es2022 --outfile=public/js/app.js
+```
 
 ## Reproducing them
 

@@ -4,6 +4,17 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-07-30",
 
+  // The browser bundle is a build artifact under `public/js/`, which is
+  // gitignored — so it exists only because something built it, while the pages
+  // and the stylesheet that position its markup are tracked and always current.
+  // `wrangler deploy` uploads `./public` as it finds it, so a deploy that
+  // skipped the build shipped a bundle from a different generation than the CSS
+  // and nothing complained. Building here rather than in the npm script means
+  // every path into wrangler rebuilds it, including a bare `wrangler deploy`.
+  "build": {
+    "command": "npm run build:client"
+  },
+
   // Static assets are served directly by the edge without invoking the Worker,
   // and are never billed. Only requests that match no asset reach `fetch`.
   // A request matching a static file is served by the edge without invoking the
