@@ -442,14 +442,17 @@ Reads survive a total write-path failure. If D1 is unreachable, serve the last c
 
 The existing static pages already carry the right components — `.timeline`, `.timeline-icon`, `.timeline-event-text`, `.timeline-comment`, `.reaction-pill`, `.label-chip`, `.state-badge`, `.role-pill` map onto this model almost one-to-one. `.role-pill` in particular is exactly the `bot` badge on `githubstatus` comments.
 
-Work needed:
-- Replace hardcoded markup with rendering from `/api/issues` + `/api/issues/:n`.
-- Open/Closed filter tabs → `?state=`.
+Built (step 5):
+- Rendering from `/api/issues` + `/api/issues/:n`, Open/Closed tabs, pagination.
+- Poll loop with visibility-pause and jitter; open issues only, since closed ones can never change.
+- Locked-issue treatment (§9.3), shown to every visitor of a resolved incident.
+- Bodies rendered without parsing untrusted HTML: everything is escaped into text nodes and the single allowed tag (`<br>`) is rebuilt as a real element. No sanitiser, so no parser to bypass.
+
+Still needed (steps 6–7):
 - Comment composer, reaction picker (the 8 GitHub reactions: 👍 👎 😄 🎉 😕 ❤️ 🚀 👀), display-name editor.
-- Poll loop with visibility-pause, jitter, backoff. Open issues only.
 - Optimistic comment rendering.
-- **Locked state for closed issues** (§9.3) — composer replaced by GitHub's "This conversation has been locked" treatment. Every visitor to a resolved incident sees this, so it's high-traffic real estate.
-- Keep the README's `?v=N` cache-busting discipline, or move to hashed filenames once there's a build step.
+- Genuine markdown for user comments — `marked` + `dompurify`. A different threat model from bot bodies; do not extend the escape-and-rebuild approach to cover it.
+- Hashed asset filenames, replacing the README's manual `?v=N` discipline.
 
 ### 12.1 Joke surfaces
 

@@ -11,17 +11,31 @@ import { handleApiRequest } from "./api/router.js";
 import { ingest } from "./ingest/index.js";
 import { D1IssueStore } from "./store/d1.js";
 
+const ISSUE_PAGE = /^\/issues\/\d+\/?$/;
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const { pathname } = new URL(request.url);
 
-    // Anything that matched a static asset never reaches this handler, so a
-    // request here for a non-API path is genuinely a miss.
-    if (!pathname.startsWith("/api/")) {
-      return new Response("Not found", { status: 404 });
+    if (pathname.startsWith("/api/")) {
+      return handleApiRequest(request, env, ctx);
     }
 
-    return handleApiRequest(request, env, ctx);
+    // /issues/6 is not a file, so it lands here (see run_worker_first in
+    // wrangler.jsonc). Serving the shell lets issue URLs look like GitHub's
+    // rather than carrying a query parameter; the client reads the number back
+    // out of the path.
+    //
+    // Ask for "/issue", not "/issue.html": the asset router canonicalises
+    // extension-ful URLs by redirecting to the extensionless form, and that
+    // redirect would be passed straight through to the browser.
+    if (ISSUE_PAGE.test(pathname)) {
+      return env.ASSETS.fetch(new Request(new URL("/issue", request.url), request));
+    }
+
+    // Anything else that matched a static asset never reached this handler, so
+    // a request here really is a miss.
+    return new Response("Not found", { status: 404 });
   },
 
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {

@@ -6,44 +6,20 @@
  * particular is the one that runs on every poll from every viewer, so it is
  * written to touch only rows the caller has not already seen (SPEC 7.1).
  */
-import type { IssueState } from "../reconcile/types.js";
+import type {
+  IssueDetail,
+  IssueListPage,
+  IssueState,
+  IssueSummary,
+  TimelineEntry,
+  TimelinePage,
+} from "../shared/api.js";
+
+export type { IssueDetail, IssueListPage, IssueSummary, TimelineEntry, TimelinePage };
 
 export const ISSUES_PER_PAGE = 25;
 /** Incidents rarely exceed this; the cursor covers anything longer. */
 export const TIMELINE_PAGE_SIZE = 200;
-
-export interface IssueSummary {
-  number: number;
-  title: string;
-  state: IssueState;
-  impact: string;
-  status: string;
-  labels: string[];
-  commentCount: number;
-  shortlink: string;
-  startedAt: number;
-  resolvedAt: number | null;
-  createdAt: number;
-  updatedAt: number;
-}
-
-export interface TimelineEntry {
-  seq: number;
-  id: string;
-  kind: string;
-  actor: string;
-  body: string | null;
-  meta: Record<string, unknown> | null;
-  createdAt: number;
-  editedAt: number | null;
-  deleted: boolean;
-}
-
-export interface IssueDetail extends IssueSummary {
-  events: TimelineEntry[];
-  /** Highest seq returned; what the client polls from next. */
-  cursor: number;
-}
 
 interface IssueRow {
   number: number;
@@ -132,36 +108,43 @@ function toEntry(row: TimelineRow): TimelineEntry {
   };
 }
 
-export interface IssueListPage {
-  issues: IssueSummary[];
-  page: number;
-  hasMore: boolean;
-}
-
 export async function listIssues(
   db: D1Database,
   state: IssueState,
   page: number,
 ): Promise<IssueListPage> {
   const offset = (page - 1) * ISSUES_PER_PAGE;
-  // One extra row is fetched purely to answer "is there a next page" without a
-  // second COUNT(*) query over the whole table.
-  const result = await db
-    .prepare(
-      `SELECT ${ISSUE_COLUMNS} FROM issues
-        WHERE state = ?1
-        ORDER BY updated_at DESC, number DESC
-        LIMIT ?2 OFFSET ?3`,
-    )
-    .bind(state, ISSUES_PER_PAGE + 1, offset)
-    .all<IssueRow>();
 
-  const rows = result.results;
+  const [listResult, countResult] = await db.batch<IssueRow | { state: string; n: number }>([
+    // One extra row is fetched purely to answer "is there a next page" without
+    // a second count query over the whole table.
+    db
+      .prepare(
+        `SELECT ${ISSUE_COLUMNS} FROM issues
+          WHERE state = ?1
+          ORDER BY updated_at DESC, number DESC
+          LIMIT ?2 OFFSET ?3`,
+      )
+      .bind(state, ISSUES_PER_PAGE + 1, offset),
+    // Bounded by the number of incidents ever recorded — thousands at most, and
+    // cached for 10s at the edge. This is the aggregate SPEC 7.2 permits; the
+    // one it forbids is COUNT(*) over comments, which grows without limit.
+    db.prepare(`SELECT state, COUNT(*) AS n FROM issues GROUP BY state`),
+  ]);
+
+  const rows = (listResult?.results ?? []) as IssueRow[];
   const hasMore = rows.length > ISSUES_PER_PAGE;
+
+  const counts = { open: 0, closed: 0 };
+  for (const row of (countResult?.results ?? []) as { state: string; n: number }[]) {
+    if (row.state === "open" || row.state === "closed") counts[row.state] = row.n;
+  }
+
   return {
     issues: rows.slice(0, ISSUES_PER_PAGE).map(toSummary),
     page,
     hasMore,
+    counts,
   };
 }
 
@@ -174,12 +157,6 @@ export async function getIssueSummary(
     .bind(number)
     .first<IssueRow>();
   return row ? toSummary(row) : null;
-}
-
-export interface TimelinePage {
-  events: TimelineEntry[];
-  cursor: number;
-  hasMore: boolean;
 }
 
 /**

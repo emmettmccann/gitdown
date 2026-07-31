@@ -26,19 +26,15 @@ The cron trigger doesn't fire on its own locally, so kick off an ingestion run b
 curl "http://localhost:8787/__scheduled"
 ```
 
-Then look at what it found:
+Then open **http://localhost:8787** — the issues list renders whatever it found.
 
-```bash
-curl -s "http://localhost:8787/api/issues?state=closed" | python3 -m json.tool
-```
-
-GitHub is usually fine, so the *open* list is normally empty and the interesting data is under `state=closed`. If a week of history turns up nothing at all, raise `BACKFILL_DAYS` in `wrangler.jsonc` and reset:
+GitHub is usually fine, so the *open* list is normally empty and the interesting data is under **http://localhost:8787/?state=closed**. Click any issue to see the incident as a full GitHub-style thread. If a week of history turns up nothing at all, raise `BACKFILL_DAYS` in `wrangler.jsonc` and reset:
 
 ```bash
 rm -rf .wrangler/state && npm run db:migrate
 ```
 
-Note that the backfill only runs once per database — the reset above is how you re-run it.
+Note that the backfill only runs once per database — the reset above is how you re-run it. `npm run dev` rebuilds the browser bundle each time; after editing anything under `src/client/`, restart it (or run `npm run build:client`).
 
 ## API
 
@@ -71,13 +67,15 @@ src/
   store/        D1 persistence and read queries
   ingest/       backfill + poll entry points
   api/          routes and edge caching
+  shared/       the API contract, imported by both Worker and browser
+  client/       front-end, bundled by esbuild to public/js/app.js
 migrations/     D1 schema
-public/         static front-end (served by the Worker, free and uncounted)
+public/         static assets (served by the edge, free and uncounted)
 test/           fixtures are real recorded payloads
 ```
 
 ## Status
 
-Ingestion and the read API work. Still to come: wiring the static pages to real data, then comments, reactions, and abuse controls. See the build order in [SPEC.md](SPEC.md#16-build-order).
+Ingestion, the read API, and the front-end work — it is a live, browsable mirror of GitHub's status page. Still to come: comments, reactions, and abuse controls. See the build order in [SPEC.md](SPEC.md#16-build-order).
 
 Not affiliated with, endorsed by, or connected to GitHub or Microsoft.

@@ -278,6 +278,9 @@ svg.octicon { fill: currentColor; vertical-align: text-bottom; }
 .label-chip.label-gray { background: #eeeeee; color: #24292f; }
 .label-chip.label-purple { background: #e3d6fc; color: #4b2b82; }
 .label-chip.label-blue { background: #ddf2ff; color: #0a3069; }
+/* Impact levels, mirroring githubstatus.com's own severity colours. */
+.label-chip.label-orange { background: #ffe7d1; color: #6b2e00; }
+.label-chip.label-yellow { background: #fff5cc; color: #6b5000; }
 .label-chip.label-green { background: #d6f5d6; color: #0f5d1f; }
 a.label-chip { display: inline-block; }
 a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
@@ -394,3 +397,48 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
 .timeline-icon.avatar-c5, .avatar-sm.avatar-c5, .avatar.avatar-c5 { background: #ffab70; }
 .timeline-icon.avatar-c6, .avatar-sm.avatar-c6, .avatar.avatar-c6 { background: #f97583; }
 .timeline-icon.avatar-c7, .avatar-sm.avatar-c7, .avatar.avatar-c7 { background: #6ec9c2; }
+
+/* ---- states added with the dynamic front-end ---- */
+
+.empty-state {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--color-fg-muted);
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  background: var(--color-canvas-subtle);
+}
+
+.pager {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.pager:empty { display: none; }
+
+.issue-subtitle {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--color-fg-muted);
+  font-size: 14px;
+}
+
+/* Every visitor to a resolved incident sees this, forever (SPEC 12.1). */
+.locked-notice {
+  margin: 16px 0 0 56px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  background: var(--color-canvas-subtle);
+  color: var(--color-fg-muted);
+  font-size: 14px;
+}
+
+.timeline-event-text del { color: var(--color-fg-muted); }
+.timeline-event-text ins { text-decoration: none; font-weight: 600; }
+
+/* Which state tab is selected. Inactive is muted; active keeps full contrast. */
+.issue-list-toolbar .state-tabs a { color: var(--color-fg-muted); font-weight: 400; }
+.issue-list-toolbar .state-tabs a.active { color: var(--color-fg-default); font-weight: 600; }

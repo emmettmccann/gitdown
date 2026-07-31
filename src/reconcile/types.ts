@@ -13,11 +13,12 @@ import type {
   IncidentImpact,
   IncidentStatus,
 } from "../statuspage/schema.js";
+import type { IssueState } from "../shared/api.js";
+
+export type { IssueState };
 
 /** Every bot-authored row is attributed to the status page itself. */
 export const BOT_ACTOR = "githubstatus";
-
-export type IssueState = "open" | "closed";
 
 /**
  * What we already believe about an incident, as loaded from storage. This is
