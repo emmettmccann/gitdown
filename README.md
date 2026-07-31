@@ -36,7 +36,9 @@ GitHub is usually fine, so the *open* list is normally empty and the interesting
 rm -rf .wrangler/state && npm run db:migrate
 ```
 
-Note that the backfill only runs once per database — the reset above is how you re-run it. `npm run dev` rebuilds the browser bundle each time; after editing anything under `src/client/`, restart it (or run `npm run build:client`).
+Note that the backfill only runs once per database — the reset above is how you re-run it. Wrangler rebuilds the browser bundle on every `dev` and `deploy` (the `build` command in `wrangler.jsonc`), so after editing anything under `src/client/`, restart it.
+
+That bundle lands in `public/js/`, which is gitignored, while the pages and stylesheet that position its markup are tracked. Building from wrangler rather than from the npm scripts is what keeps the two in the same generation — a bare `wrangler deploy` rebuilds it too. The build then runs `scripts/check-assets.mjs`, which fails if any page references a static file that isn't on disk, so a missing bundle stops the deploy instead of shipping a page that never finishes loading.
 
 ## API
 
