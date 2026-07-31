@@ -116,13 +116,19 @@ export async function listIssues(
   const offset = (page - 1) * ISSUES_PER_PAGE;
 
   const [listResult, countResult] = await db.batch<IssueRow | { state: string; n: number }>([
+    // Newest-opened first. Reconcile hands out numbers oldest-first, so
+    // `number DESC` is open-date order without reading a timestamp column, and
+    // it is stable under pagination: a comment landing on an old issue cannot
+    // shuffle it up the list and push a row the reader has already seen onto
+    // the next page.
+    //
     // One extra row is fetched purely to answer "is there a next page" without
     // a second count query over the whole table.
     db
       .prepare(
         `SELECT ${ISSUE_COLUMNS} FROM issues
           WHERE state = ?1
-          ORDER BY updated_at DESC, number DESC
+          ORDER BY number DESC
           LIMIT ?2 OFFSET ?3`,
       )
       .bind(state, ISSUES_PER_PAGE + 1, offset),

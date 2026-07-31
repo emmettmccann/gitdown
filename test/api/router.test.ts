@@ -76,6 +76,52 @@ describe("GET /api/issues", () => {
     expect(body.issues[0]!.labels).toContain("Actions");
   });
 
+  it("orders by the date the issue was opened, newest first", async () => {
+    const feed = parseIncidentsResponse(incidentsFixture as unknown);
+    const store = new D1IssueStore(env.DB);
+    // Reconcile numbers issues oldest-first, so seed them the same way.
+    const oldestFirst = [...feed.incidents].sort((a, b) => a.created_at - b.created_at);
+    for (const incident of oldestFirst.slice(0, 5)) {
+      await store.apply(diffIncident(incident, null));
+    }
+
+    const body = await call("/api/issues?state=closed").then((r) =>
+      r.json<{ issues: { number: number; createdAt: number }[] }>(),
+    );
+
+    const numbers = body.issues.map((i) => i.number);
+    expect(numbers).toEqual([5, 4, 3, 2, 1]);
+    const opened = body.issues.map((i) => i.createdAt);
+    expect(opened).toEqual([...opened].sort((a, b) => b - a));
+  });
+
+  it("does not move an old issue up the list when it gets new activity", async () => {
+    const store = new D1IssueStore(env.DB);
+    const bumped = snapshotAfter(RICH, 2);
+    // #1 opens first; #2 opens later but then goes quiet, so #1's new update
+    // leaves it the most recently *active* issue and the oldest one open.
+    await store.apply(diffIncident(snapshotAfter(RICH, 1), null));
+    const other = parseIncidentsResponse(incidentsFixture as unknown).incidents[0]!;
+    await store.apply(
+      diffIncident(
+        {
+          ...other,
+          status: "investigating",
+          created_at: bumped.updated_at - 1,
+          updated_at: bumped.updated_at - 1,
+        },
+        null,
+      ),
+    );
+    await store.apply(diffIncident(bumped, (await store.loadByIncidentId(RICH.id))!));
+
+    const body = await call("/api/issues").then((r) =>
+      r.json<{ issues: { number: number }[] }>(),
+    );
+
+    expect(body.issues.map((i) => i.number)).toEqual([2, 1]);
+  });
+
   it("paginates without a second count query", async () => {
     const feed = parseIncidentsResponse(incidentsFixture as unknown);
     const store = new D1IssueStore(env.DB);
