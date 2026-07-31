@@ -20,6 +20,9 @@ export const BACKFILL_WINDOW_DAYS = 7;
 
 export interface IngestOptions extends ClientOptions {
   now?: () => number;
+  /** Overrides BACKFILL_WINDOW_DAYS. Useful locally, where a 7-day window
+   *  often catches nothing because GitHub is usually fine. */
+  windowDays?: number;
 }
 
 /**
@@ -37,7 +40,8 @@ export async function backfill(
   if (await store.getSyncState(BACKFILL_KEY)) return null;
 
   const feed = await fetchIncidents(options);
-  const cutoff = now() - BACKFILL_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  const windowDays = options.windowDays ?? BACKFILL_WINDOW_DAYS;
+  const cutoff = now() - windowDays * 24 * 60 * 60 * 1000;
   const recent = feed.incidents.filter((incident) => incident.created_at >= cutoff);
 
   const result = await reconcile({ ...feed, incidents: recent }, store, {

@@ -66,6 +66,23 @@ describe("first sighting", () => {
     });
   });
 
+  it("ignores component entries whose status did not move", () => {
+    // Real incidents carry several of these: Statuspage lists every component an
+    // update touches, changed or not. "Actions went from major_outage to
+    // major_outage" is noise — it is a transition event or it is nothing.
+    const noop = RICH.incident_updates
+      .flatMap((u) => u.affected_components ?? [])
+      .filter((c) => c.old_status === c.new_status);
+    expect(noop.length).toBeGreaterThan(0);
+
+    const rendered = diffIncident(RICH, null).append.filter(
+      (e) => e.kind === "component_changed",
+    );
+
+    expect(rendered.length).toBeGreaterThan(0);
+    expect(rendered.every((e) => e.from !== e.to)).toBe(true);
+  });
+
   it("closes immediately when the incident is already resolved", () => {
     // Backfill, or ingestion having been down through the whole incident.
     const change = diffIncident(RICH, null);

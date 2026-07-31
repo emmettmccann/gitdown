@@ -5,13 +5,14 @@
  * before this code runs, `fetch` handles the API, and `scheduled` drives
  * ingestion once a minute.
  *
- * The API is not built yet — that is step 4.
+ * The API is read-only; the write path is step 6.
  */
+import { handleApiRequest } from "./api/router.js";
 import { ingest } from "./ingest/index.js";
 import { D1IssueStore } from "./store/d1.js";
 
 export default {
-  async fetch(request: Request): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const { pathname } = new URL(request.url);
 
     // Anything that matched a static asset never reaches this handler, so a
@@ -20,7 +21,7 @@ export default {
       return new Response("Not found", { status: 404 });
     }
 
-    return Response.json({ error: "not implemented" }, { status: 501 });
+    return handleApiRequest(request, env, ctx);
   },
 
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
@@ -30,9 +31,12 @@ export default {
 
 async function runIngestion(env: Env): Promise<void> {
   const store = new D1IssueStore(env.DB);
+  const windowDays = Number(env.BACKFILL_DAYS);
 
   try {
-    const result = await ingest(store);
+    const result = await ingest(store, {
+      ...(Number.isFinite(windowDays) && windowDays > 0 ? { windowDays } : {}),
+    });
 
     // Rejected incidents mean githubstatus.com has changed shape under us —
     // surfacing them is the whole point of validating at the boundary.

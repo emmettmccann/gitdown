@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --test-scheduled",
+    "db:migrate": "wrangler d1 migrations apply gitdown --local",
+    "db:migrate:remote": "wrangler d1 migrations apply gitdown --remote",
     "deploy": "wrangler deploy",
     "test": "vitest run",
     "test:watch": "vitest",

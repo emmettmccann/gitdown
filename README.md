@@ -1,26 +1,83 @@
 # gitdown
 
-A parody of the GitHub Issues UI. Hand-built static HTML/CSS that visually mimics github.com's issues list and single-issue views — not scraped or copied from GitHub's actual source, just recreated to look the part.
+A parody of the GitHub Issues UI that turns **GitHub's own status page into a conversational feed**.
 
-This is a front-end building-block skeleton: static pages and reusable CSS components (labels, timeline events, comment boxes, reactions, avatars, etc.) to draw from when building out a real, functional parody of the Issues list + single-issue flow.
+When GitHub opens an incident on [githubstatus.com](https://www.githubstatus.com), gitdown opens a corresponding issue. Each official incident update becomes a bot comment on that issue's timeline, component outages become timeline events, impact escalation becomes a label change, and when GitHub resolves the incident the issue closes — permanently. While it's open, anyone can pile in and complain.
+
+The visual layer is hand-built HTML/CSS that mimics github.com's issues views. Nothing is scraped or copied from GitHub's source; it's recreated to look the part.
+
+See [SPEC.md](SPEC.md) for the full design — architecture, data model, cost model, and the reasoning behind the decisions.
 
 ## Running locally
 
+Needs Node 22+. No Cloudflare account required — `wrangler dev` runs the Worker and a local SQLite database on your machine.
+
 ```bash
-cd public && python3 -m http.server 8420
+npm install && npm run db:migrate
 ```
 
-Then open `http://localhost:8420/index.html`.
+```bash
+npm run dev
+```
 
-## What's here
+The cron trigger doesn't fire on its own locally, so kick off an ingestion run by hand. This fetches **real live data** from githubstatus.com:
 
-- `public/index.html` — issues list page
-- `public/issue-1.html` — a sparse single-issue page (no labels, no comments)
-- `public/issue-2.html` — a filled-out single-issue page with fake content, showing off the fuller component set: colored labels, bot comments, reactions, timeline/activity events, cross-reference mentions, avatar stacks
-- `public/css/style.css` — shared stylesheet with GitHub-like design tokens (colors, spacing, typography) and all component styles
+```bash
+curl "http://localhost:8787/__scheduled"
+```
 
-Note: when editing `style.css`, bump the `?v=N` query param on the `<link>` tags in the HTML files — the browser aggressively caches the stylesheet otherwise.
+Then look at what it found:
 
-## Not yet built
+```bash
+curl -s "http://localhost:8787/api/issues?state=closed" | python3 -m json.tool
+```
 
-This is visuals/structure only — no backend, no routing, no real data. Next steps: an actual issues data model, dynamic list/detail views, and create/comment functionality.
+GitHub is usually fine, so the *open* list is normally empty and the interesting data is under `state=closed`. If a week of history turns up nothing at all, raise `BACKFILL_DAYS` in `wrangler.jsonc` and reset:
+
+```bash
+rm -rf .wrangler/state && npm run db:migrate
+```
+
+Note that the backfill only runs once per database — the reset above is how you re-run it.
+
+## API
+
+| Endpoint | Notes |
+|---|---|
+| `GET /api/issues?state=open\|closed&page=N` | Issue list, 25 per page |
+| `GET /api/issues/:n` | Issue with its full timeline |
+| `GET /api/issues/:n/timeline?since=<seq>` | Poll for new events only |
+
+Closed issues are immutable, so they're served with a one-year `immutable` cache header; live ones get 5 seconds. Timeline responses carry an `ETag` — repeat polls come back `304` with no body.
+
+## Testing
+
+```bash
+npm test
+```
+
+Tests run inside the real Workers runtime (`workerd`) with a real D1 database, not mocks. The reconcile suite replays a recorded 18-update GitHub incident one poll at a time, which is the only way to reach the bugs that matter — a missed update, a duplicated comment, a close firing twice.
+
+```bash
+npm run typecheck
+```
+
+## Layout
+
+```
+src/
+  statuspage/   fetch + validate githubstatus.com (Zod schemas, fixtures)
+  reconcile/    pure diffing: incident -> issue changes
+  store/        D1 persistence and read queries
+  ingest/       backfill + poll entry points
+  api/          routes and edge caching
+migrations/     D1 schema
+public/         static front-end (served by the Worker, free and uncounted)
+test/           fixtures are real recorded payloads
+```
+
+## Status
+
+Ingestion and the read API work. Still to come: wiring the static pages to real data, then comments, reactions, and abuse controls. See the build order in [SPEC.md](SPEC.md#16-build-order).
+
+Not affiliated with, endorsed by, or connected to GitHub or Microsoft.

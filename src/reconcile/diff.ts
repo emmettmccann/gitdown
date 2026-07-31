@@ -103,6 +103,12 @@ function eventsForUpdate(
   ];
 
   for (const change of update.affected_components ?? []) {
+    // Statuspage lists every component an update touches, including ones whose
+    // status did not move — a long incident carries several of these. Rendering
+    // "Actions went from major_outage to major_outage" is noise, and it is a
+    // transition event or it is nothing.
+    if (change.old_status === change.new_status) continue;
+
     events.push({
       kind: "component_changed",
       // Deterministic and unique: one transition per component per update.
