@@ -37,14 +37,10 @@
   // `routes` without this silently turns it off.
   "workers_dev": true,
 
-  // Custom domains are declared here rather than clicked in the dashboard.
-  // Cloudflare creates the DNS record and provisions the TLS certificate on
-  // deploy — but only if nothing else already occupies that hostname. Blocked
-  // until the imported GoDaddy landing-page records are deleted.
-  // "routes": [
-  //   { "pattern": "gitdown.chat", "custom_domain": true },
-  //   { "pattern": "www.gitdown.chat", "custom_domain": true }
-  // ],
+  // Declared here rather than left as dashboard-only state, so the domain is
+  // reproducible from the repo and a deploy cannot quietly drop it. Cloudflare
+  // manages the DNS record and TLS certificate for a custom domain itself.
+  "routes": [{ "pattern": "gitdown.chat", "custom_domain": true }],
 
   "vars": {
     // How much history the one-time backfill seeds. Raise it locally when
