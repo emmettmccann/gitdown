@@ -7,7 +7,8 @@
  * interpreted as markup (SPEC 10.3).
  */
 import type { IssueSummary, TimelineEntry } from "../shared/api.js";
-import { renderBody } from "./text.js";
+import { avatarClass } from "./session.js";
+import { renderBody, renderUserBody } from "./text.js";
 import { exactTime, humanizeStatus, relativeTime } from "./time.js";
 
 export const BOT_ACTOR = "githubstatus";
@@ -119,27 +120,47 @@ export function issueRow(issue: IssueSummary): HTMLLIElement {
   return row;
 }
 
-/** A bot comment: the status update itself. */
-function statusUpdateRow(entry: TimelineEntry): HTMLElement {
-  const row = el("div", "timeline-row");
+interface Author {
+  name: string;
+  /** Bot rows link out to the source; a visitor has nowhere to link to. */
+  href?: string;
+  bot?: boolean;
+  avatar: string;
+}
 
+/**
+ * The comment card, shared by bot updates and visitor comments.
+ *
+ * They differ only in who the header names and how the body is rendered — the
+ * card, the kebab and the timestamp are the same object, and keeping them one
+ * function is what stops the two drifting apart visually.
+ */
+function commentCard(
+  entry: TimelineEntry,
+  author: Author,
+  prefix: string,
+  body: DocumentFragment | HTMLElement,
+): HTMLElement {
+  const row = el("div", "timeline-row");
   const box = el("div", "timeline-comment comment-box");
 
   const header = el("div", "comment-header");
   // Signed in, the avatar is inside the card next to the name rather than out
   // in the timeline gutter.
   const who = el("div");
-  who.appendChild(el("span", "avatar avatar-c2"));
-  const name = el("a", "who", BOT_ACTOR);
-  name.href = "https://www.githubstatus.com";
-  who.append(name, el("span", "role-pill bot", "bot"));
+  who.appendChild(el("span", `avatar ${author.avatar}`));
 
-  const status = typeof entry.meta?.["status"] === "string" ? entry.meta["status"] : null;
-  who.appendChild(
-    timeSpan(entry.createdAt, status ? `${humanizeStatus(status)} · ` : "commented "),
-  );
+  if (author.href) {
+    const name = el("a", "who", author.name);
+    name.href = author.href;
+    who.appendChild(name);
+  } else {
+    who.appendChild(el("span", "who", author.name));
+  }
+  if (author.bot) who.appendChild(el("span", "role-pill bot", "bot"));
+
+  who.appendChild(timeSpan(entry.createdAt, prefix));
   if (entry.editedAt !== null) who.appendChild(el("span", "when", " · edited"));
-
   header.appendChild(who);
 
   // Dead chrome, wired to the unicorn page with everything else.
@@ -153,18 +174,59 @@ function statusUpdateRow(entry: TimelineEntry): HTMLElement {
 
   box.appendChild(header);
 
-  const body = el("div", "comment-body");
-  if (entry.deleted) {
-    body.appendChild(el("em", undefined, "This comment was removed upstream."));
-  } else {
-    const paragraph = el("p");
-    paragraph.appendChild(renderBody(entry.body ?? ""));
-    body.appendChild(paragraph);
-  }
-  box.appendChild(body);
+  const bodyWrap = el("div", "comment-body");
+  bodyWrap.appendChild(body);
+  box.appendChild(bodyWrap);
 
   row.appendChild(box);
   return row;
+}
+
+/** A bot comment: the status update itself. */
+function statusUpdateRow(entry: TimelineEntry): HTMLElement {
+  const status = typeof entry.meta?.["status"] === "string" ? entry.meta["status"] : null;
+
+  let body: HTMLElement;
+  if (entry.deleted) {
+    body = el("em", undefined, "This comment was removed upstream.");
+  } else {
+    body = el("p");
+    body.appendChild(renderBody(entry.body ?? ""));
+  }
+
+  return commentCard(
+    entry,
+    { name: BOT_ACTOR, href: "https://www.githubstatus.com", bot: true, avatar: "avatar-c2" },
+    status ? `${humanizeStatus(status)} · ` : "commented ",
+    body,
+  );
+}
+
+/**
+ * A comment somebody wrote.
+ *
+ * The display name is read from the row's own meta rather than looked up, so it
+ * is whatever the author was called when they posted — see the note on
+ * `writeComment`. Falling back to the session id keeps a row with unexpected
+ * meta rendering as *something* instead of an empty header.
+ */
+export function userCommentRow(entry: TimelineEntry): HTMLElement {
+  const name = typeof entry.meta?.["name"] === "string" ? entry.meta["name"] : entry.actor;
+
+  let body: HTMLElement;
+  if (entry.deleted) {
+    body = el("em", undefined, "This comment was removed.");
+  } else {
+    body = el("p");
+    body.appendChild(renderUserBody(entry.body ?? ""));
+  }
+
+  return commentCard(
+    entry,
+    { name, avatar: avatarClass(entry.actor) },
+    "commented ",
+    body,
+  );
 }
 
 /**
@@ -203,6 +265,9 @@ export function timelineRow(entry: TimelineEntry): HTMLElement {
   switch (entry.kind) {
     case "status_update":
       return statusUpdateRow(entry);
+
+    case "comment":
+      return userCommentRow(entry);
 
     case "opened":
       return eventRow(

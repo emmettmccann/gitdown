@@ -36,7 +36,7 @@ interface IssueRow {
   updated_at: number;
 }
 
-interface TimelineRow {
+export interface TimelineRow {
   seq: number;
   id: string;
   kind: string;
@@ -51,7 +51,7 @@ interface TimelineRow {
 const ISSUE_COLUMNS = `number, title, state, impact, status, components, comment_count,
                        shortlink, started_at, resolved_at, created_at, updated_at`;
 
-const TIMELINE_COLUMNS = `seq, id, kind, actor, body, meta, created_at, edited_at, deleted_at`;
+export const TIMELINE_COLUMNS = `seq, id, kind, actor, body, meta, created_at, edited_at, deleted_at`;
 
 function parseJsonArray(raw: string): string[] {
   try {
@@ -91,7 +91,7 @@ function toSummary(row: IssueRow): IssueSummary {
   };
 }
 
-function toEntry(row: TimelineRow): TimelineEntry {
+export function toEntry(row: TimelineRow): TimelineEntry {
   const deleted = row.deleted_at !== null;
   return {
     seq: row.seq,

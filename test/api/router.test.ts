@@ -310,8 +310,16 @@ describe("caching", () => {
 });
 
 describe("method and route handling", () => {
-  it("rejects writes while the API is read-only", async () => {
+  // The write path arrived in step 6, so a POST is no longer refused outright —
+  // it is refused for the same reason any other unrouted path is. Methods with
+  // no route at all still are. Write behaviour proper lives in writes.test.ts.
+  it("404s a write to a path that only reads", async () => {
     const response = await call("/api/issues", { method: "POST" });
+    expect(response.status).toBe(404);
+  });
+
+  it("rejects a method the API has no route for", async () => {
+    const response = await call("/api/issues", { method: "DELETE" });
     expect(response.status).toBe(405);
   });
 

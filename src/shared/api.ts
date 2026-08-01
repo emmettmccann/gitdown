@@ -38,6 +38,39 @@ export interface TimelineEntry {
   deleted: boolean;
 }
 
+/**
+ * What the browser sends to post a comment (SPEC 9.1).
+ *
+ * `token` is the session secret and appears only in request bodies — never in a
+ * URL, where it would land in logs and `Referer` headers.
+ */
+export interface CommentRequest {
+  /** Public: becomes the row's `actor` and identifies the author in the feed. */
+  sessionId: string;
+  token: string;
+  /**
+   * Used only if this session id is new. An established session keeps the name
+   * the server already holds; renaming is `PUT /api/session/name`, so a stolen
+   * session id cannot rename someone by posting.
+   */
+  displayName: string;
+  body: string;
+}
+
+export interface CommentCreated {
+  entry: TimelineEntry;
+}
+
+export interface NameRequest {
+  sessionId: string;
+  token: string;
+  displayName: string;
+}
+
+/** The longest comment the server will store. Matches the composer's counter. */
+export const MAX_COMMENT_LENGTH = 4000;
+export const MAX_NAME_LENGTH = 40;
+
 export interface IssueListPage {
   issues: IssueSummary[];
   page: number;
