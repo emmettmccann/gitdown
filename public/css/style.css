@@ -21,6 +21,7 @@
   --color-accent-fg: #0969da;
   --color-accent-emphasis: #0969da;
   --color-success-fg: #1a7f37;
+  --color-danger-fg: #cf222e;
   --color-success-emphasis: #1f883d;
   --color-open-bg: #1f883d;
   --color-closed-bg: #8250df;
@@ -522,6 +523,20 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
 .timeline-event-text .label-chip { font-size: 11px; margin-left: 0; }
 .timeline-comment { min-width: 0; }
 
+/* A comment rendered before the server has confirmed it (SPEC 9.2). Faded
+   rather than replaced by a spinner: the point is that your comment is already
+   there and the site is just catching up. */
+.timeline-row.pending .comment-box { opacity: 0.55; }
+
+/* The write did not land. The card stays — the text someone typed during an
+   outage should not vanish because the request failed — and says why. */
+.timeline-row.failed .comment-box { border-color: var(--color-danger-fg); }
+.comment-failure {
+  padding: 0 16px 12px;
+  font-size: 12px;
+  color: var(--color-danger-fg);
+}
+
 .role-pill {
   border: 1px solid var(--color-border-default);
   border-radius: 2em;
@@ -690,11 +705,40 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
 }
 
 /* ---- comment composer ---- */
-/* Chrome, not a feature (SPEC 16 puts comments in step 6). It is here because a
-   signed-in issue page without one does not read as signed in. */
+/* The textarea, Comment, and the name editor post for real (SPEC 9); the
+   markdown toolbar around them is still chrome. It is all here because a
+   signed-in issue page without a composer does not read as signed in. */
 
 .add-comment { margin-top: 24px; }
 .add-comment h2 { font-size: 16px; margin: 0 0 8px; }
+
+/* Who you are posting as. The real page knows because you signed in; here it is
+   a name held in localStorage, so it has to be stated rather than assumed. */
+.composer-identity {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 8px;
+  font-size: 12px; color: var(--color-fg-muted);
+}
+.composer-identity .avatar { width: 20px; height: 20px; }
+.btn-link {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-size: 12px; color: var(--color-accent-fg);
+}
+.btn-link:hover { text-decoration: underline; }
+.identity-edit { display: flex; align-items: center; gap: 6px; }
+.identity-edit input {
+  font: inherit; font-size: 12px;
+  padding: 3px 8px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius);
+  background: var(--color-canvas-default);
+  color: var(--color-fg-default);
+}
+.identity-edit input:focus {
+  outline: none;
+  border-color: var(--color-accent-fg);
+}
+.identity-error { color: var(--color-danger-fg); }
 .composer {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius);

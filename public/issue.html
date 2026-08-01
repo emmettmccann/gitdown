@@ -101,13 +101,25 @@
         </div>
 
         <!--
-          Chrome, not a feature: comments are step 6 (SPEC 16) and nothing here
-          posts anything. Every control routes to the unicorn page like the rest
-          of the dead chrome, and the whole block is hidden on a resolved
+          The composer posts for real (SPEC 9). Three controls are live — the
+          textarea, Comment, and the display-name editor — and they carry
+          `class="live"` so the dead-chrome handler skips them. Everything else
+          in here, the whole markdown toolbar included, is still parody chrome
+          routed to the unicorn page. The block is hidden on a resolved
           incident, where the thread is locked (SPEC 9.3).
         -->
         <div class="add-comment" id="add-comment" hidden>
           <h2>Add a comment</h2>
+          <div class="composer-identity">
+            <span class="avatar" id="identity-avatar"></span>
+            <span>Commenting as <strong id="identity-name">…</strong></span>
+            <button class="btn-link live" id="identity-change" type="button">Change</button>
+            <span class="identity-edit" id="identity-edit" hidden>
+              <input class="live" id="identity-input" type="text" maxlength="40" aria-label="Display name">
+              <button class="btn live" id="identity-save" type="button">Save</button>
+            </span>
+            <span class="identity-error" id="identity-error" hidden></span>
+          </div>
           <div class="composer">
             <div class="composer-tabs">
               <div class="tabs">
@@ -151,7 +163,7 @@
                 </button>
               </div>
             </div>
-            <textarea placeholder="Use Markdown to format your comment" readonly aria-label="Comment"></textarea>
+            <textarea class="live" id="comment-body" placeholder="Use Markdown to format your comment" aria-label="Comment"></textarea>
             <div class="composer-footer">
               <span class="attach">
                 <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"><path d="M12.212 3.02a1.753 1.753 0 0 0-2.478.003l-5.83 5.83a3.007 3.007 0 0 0-.88 2.127c0 .795.315 1.551.88 2.116.567.567 1.322.88 2.117.88s1.55-.313 2.117-.88l5.5-5.5a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734l-5.5 5.5a4.5 4.5 0 0 1-6.364-6.364l5.83-5.83a3.25 3.25 0 0 1 4.6 4.595l-5.955 5.688a2.16 2.16 0 0 1-3.031-3.081l5.16-5.157a.75.75 0 0 1 1.06 1.06l-5.157 5.157a.66.66 0 0 0 .934.933l5.954-5.686a1.75 1.75 0 0 0 .003-2.476Z"></path></svg>
@@ -165,7 +177,7 @@
                   </button>
                   <button class="btn" type="button" aria-label="Close with comment options">▾</button>
                 </div>
-                <button class="btn btn-primary disabled" type="button">Comment</button>
+                <button class="btn btn-primary live disabled" id="comment-submit" type="button">Comment</button>
               </div>
             </div>
           </div>
