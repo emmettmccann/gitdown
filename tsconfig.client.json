@@ -1,12 +1,15 @@
 {
-  // The front-end bundle. Separate from the Worker config because it needs the
-  // DOM lib and must NOT see the Workers runtime globals — the two define
+  // The front-end app. Separate from the Worker config because it needs the DOM
+  // lib and must NOT see the Workers runtime globals — the two define
   // overlapping names (fetch, Response, …) and mixing them hides real errors.
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "lib": ["es2022", "dom", "dom.iterable"],
-    "types": []
+    "types": [],
+    // React 19's automatic runtime: no `import React` in every file.
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": false
   },
-  "include": ["src/client/**/*.ts", "src/shared/**/*.ts"],
+  "include": ["src/client/**/*.ts", "src/client/**/*.tsx", "src/shared/**/*.ts"],
   "exclude": []
 }

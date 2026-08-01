@@ -4,24 +4,37 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:client": "esbuild src/client/main.ts --bundle --minify --format=esm --target=es2022 --outfile=public/js/app.js && node scripts/check-assets.mjs",
-    "dev": "wrangler dev --test-scheduled",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "db:migrate": "wrangler d1 migrations apply gitdown --local",
     "db:migrate:remote": "wrangler d1 migrations apply gitdown --remote",
-    "deploy": "wrangler deploy",
+    "deploy": "vite build && wrangler deploy",
     "test": "vitest run",
     "test:watch": "vitest",
     "types": "wrangler types",
     "typecheck": "wrangler types && tsc --noEmit && tsc --noEmit -p tsconfig.client.json"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.3.3",
+    "@radix-ui/react-toolbar": "^1.1.19",
+    "@tanstack/react-query": "^5.101.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router": "^8.3.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.19.1",
-    "esbuild": "^0.28.1",
+    "@cloudflare/vite-plugin": "^1.50.0",
+    "@cloudflare/vitest-pool-workers": "^0.20.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
     "typescript": "^5.9.3",
+    "vite": "^8.2.0",
     "vitest": "^4.1.0",
-    "wrangler": "^4.45.0"
+    "wrangler": "^4.118.0"
   }
 }

@@ -1,10 +1,11 @@
 /**
- * Typed wrappers over the read API.
+ * Typed wrappers over the API. One `fetch` per endpoint and nothing else —
+ * caching, retries and optimistic state all live a layer up, in `queries.ts`.
  *
- * Response types come from the shared contract (src/shared/api.ts), which the
- * Worker builds against, so a change to the API shape breaks the client at
- * compile time rather than at runtime in front of whoever showed up during an
- * outage.
+ * Request and response types come from the shared contract
+ * (src/shared/api.ts), which the Worker builds against, so a change to the API
+ * shape breaks the client at compile time rather than at runtime in front of
+ * whoever showed up during an outage.
  */
 import type {
   CommentCreated,
@@ -14,29 +15,31 @@ import type {
   IssueState,
   NameRequest,
   TimelineResponse,
-} from "../shared/api.js";
+} from "../../shared/api.js";
 
 export type { IssueDetail, IssueListPage, TimelineResponse };
 
-async function getJson<T>(path: string): Promise<T> {
-  const response = await fetch(path);
-  if (!response.ok) {
-    throw new Error(`${path} returned ${response.status}`);
-  }
-  return (await response.json()) as T;
-}
-
 /**
- * A write that failed for a reason the UI has to tell the two apart.
+ * A request that failed for a reason the UI has to tell apart from the rest.
  *
  * `409` in particular is not an error to retry: the thread froze while the
  * comment was in flight (SPEC 9.3), and the composer becomes the locked notice.
+ * Reads carry the status too, so the retry policy can stop hammering a `404`
+ * that is never going to become a `200`.
  */
 export class ApiError extends Error {
   constructor(readonly status: number, message: string) {
     super(message);
     this.name = "ApiError";
   }
+}
+
+async function getJson<T>(path: string): Promise<T> {
+  const response = await fetch(path);
+  if (!response.ok) {
+    throw new ApiError(response.status, `${path} returned ${response.status}`);
+  }
+  return (await response.json()) as T;
 }
 
 async function sendJson<T>(path: string, method: "POST" | "PUT", body: unknown): Promise<T> {

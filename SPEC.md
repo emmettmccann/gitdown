@@ -444,9 +444,9 @@ The existing static pages already carry the right components — `.timeline`, `.
 
 Built (step 5):
 - Rendering from `/api/issues` + `/api/issues/:n`, Open/Closed tabs, pagination.
-- Poll loop with visibility-pause and jitter; open issues only, since closed ones can never change.
+- Poll loop with visibility-pause and jitter; open issues only, since closed ones can never change. Expressed as a TanStack Query `refetchInterval` rather than a hand-rolled timer — all four behaviours are things Query already does.
 - Locked-issue treatment (§9.3), shown to every visitor of a resolved incident.
-- Bodies rendered without parsing untrusted HTML: everything is escaped into text nodes and the single allowed tag (`<br>`) is rebuilt as a real element. No sanitiser, so no parser to bypass.
+- Bodies rendered without parsing untrusted HTML: a string child of a React element is always text, never markup, and the single allowed tag (`<br>`) is emitted as a real element rather than parsed out of the body. No sanitiser and no `dangerouslySetInnerHTML` anywhere, so there is no parser to bypass.
 
 Still needed (steps 6–7):
 - Comment composer, reaction picker (the 8 GitHub reactions: 👍 👎 😄 🎉 😕 ❤️ 🚀 👀), display-name editor.
@@ -507,14 +507,19 @@ With edge caching (§7.1) doing its job, cost during a spike is dominated by Wor
 | Database access | Raw D1 prepared statements, **no ORM** | D1 bills per row read; the SQL should be visible at the call site |
 | Migrations | `wrangler d1 migrations` | Built in |
 | API | TypeScript, no framework | Six routes; a router is a dependency to serve a `switch` |
-| Frontend | Vanilla TS | Three views over HTML that already exists; a framework would add a build/hydration story and muddy the free-static-assets property |
+| Frontend | **React + TanStack Query**, built by Vite | Originally vanilla TS, on the grounds that three views over existing HTML did not need a framework. What changed is the *write* path: an optimistic comment, a live-merging poll, and a thread that can lock mid-flight are all one piece of state that several places have to agree about, and hand-rolling that is where the DOM code was heading. Query owns the polling (§7.1) outright — pause-when-hidden, jitter, catch-up-on-focus and stop-when-closed are all configuration now. Output is still a static bundle plus static assets, so the free-static-assets property is unchanged |
+| UI primitives | **Radix** (`@radix-ui/react-*`) | The headless half of shadcn/ui, taken without Tailwind. Behaviour — roving tabindex, `asChild`, toolbar semantics — comes from the library; every pixel still comes from the hand-built stylesheet, which is the point |
 | Markdown | `marked` + `dompurify`, **client-side** | DOMPurify against a real browser DOM beats anything runnable in a Worker, where there's no DOM (§10.3) |
 | Tests | `vitest@^4.1` + `@cloudflare/vitest-pool-workers` | Runs tests *inside* workerd with real D1 bindings and isolated per-test storage — not mocks |
 
 ```
 runtime:  zod
-client:   marked, dompurify
-dev:      wrangler, typescript, vitest@^4.1.0, @cloudflare/vitest-pool-workers
+client:   react, react-dom, react-router, @tanstack/react-query,
+          @radix-ui/react-slot, @radix-ui/react-toolbar,
+          class-variance-authority, clsx
+          (marked, dompurify — still to come with the markdown subset)
+dev:      wrangler, typescript, vite, @vitejs/plugin-react,
+          @cloudflare/vite-plugin, vitest@^4.1.0, @cloudflare/vitest-pool-workers
 ```
 
 Zod's role is narrow and deliberate: it guards the Statuspage boundary only. That payload comes from an API we don't control, arrives partly via an unauthenticated webhook path, and gets rendered into a public page. `z.infer` also means the schema and the TypeScript types can't drift. If GitHub ever adds an incident status or component state, ingestion fails loudly at the boundary instead of silently writing a broken timeline.
@@ -541,7 +546,7 @@ One-time exception: `wrangler d1 create gitdown` prints a `database_id` that mus
 
 Explicitly **not** required: no separate host, no Pages project, no Vercel/Netlify, no Postgres/Supabase, no Redis, no CDN service, no queue (§9.2).
 
-**Local development needs none of it.** `wrangler dev` runs the Worker and a local D1 file on the laptop; the vitest pool runs the real runtime offline. Steps 1–4 of the build order can be completed and tested before any account exists.
+**Local development needs none of it.** `vite dev` runs the Worker inside workerd against a local D1 file on the laptop, and serves the front end beside it; the vitest pool runs the real runtime offline. Steps 1–4 of the build order can be completed and tested before any account exists.
 
 ---
 

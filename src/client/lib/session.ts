@@ -10,6 +10,8 @@
  *   - `token` is secret. It goes out only in a request body over TLS, is never
  *     rendered, and the server keeps only its SHA-256.
  */
+import { useSyncExternalStore } from "react";
+
 const KEY = { id: "gd.session.id", token: "gd.session.token", name: "gd.session.name" } as const;
 
 export interface Session {
@@ -48,6 +50,19 @@ function writeStored(key: string, value: string): void {
 
 let cached: Session | null = null;
 
+/**
+ * The session is a store, not a value: renaming yourself has to repaint the
+ * composer's "Commenting as …" line, and the store is what tells React that.
+ */
+const listeners = new Set<() => void>();
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
 export function getSession(): Session {
   if (cached) return cached;
 
@@ -67,7 +82,21 @@ export function getSession(): Session {
 
 export function setDisplayName(displayName: string): void {
   writeStored(KEY.name, displayName);
-  if (cached) cached.displayName = displayName;
+  // Replaced rather than mutated: `useSyncExternalStore` compares snapshots by
+  // identity, and an in-place edit would leave every subscriber on the old
+  // name.
+  cached = { ...getSession(), displayName };
+  for (const listener of listeners) listener();
+}
+
+/**
+ * Who you are posting as, as a hook.
+ *
+ * `getSession` is the snapshot on both sides because there is no server render
+ * to disagree with — the shell ships empty and React mounts into it.
+ */
+export function useSession(): Session {
+  return useSyncExternalStore(subscribe, getSession, getSession);
 }
 
 /** How many filler avatar colours the stylesheet defines. */
