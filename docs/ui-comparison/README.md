@@ -11,11 +11,6 @@ equivalent views on github.com.
 | `signed-in-issue-before.png` / `signed-in-issue-after.png` | `/issues/5` | Signed-out chrome → signed-in |
 | `stale-bundle-before.png` / `stale-bundle-after.png` | `/issues/8` | Deployed bundle out of step with the CSS |
 | `comment-header-before.png` / `comment-header-after.png` | `/issues/8` | Comment header flat → filled band |
-| `react-list-before.png` / `react-list-after.png` | `/?state=closed` | DOM client → React. Should be identical |
-| `react-issue-before.png` / `react-issue-after.png` | `/issues/5` | DOM client → React. Should be identical |
-| `composer-identity-before.png` / `composer-identity-after.png` | `/issues/5` | "Commenting as" moves into the composer footer |
-| `profile-menu-before.png` / `profile-menu-after.png` | `/issues/5` | Clicking the avatar: unicorn page → account menu |
-| `profile-menu-rename-after.png` | `/issues/5` | That menu with the rename editor open |
 
 The `stale-bundle-*` pair captures the deployed issue view against the fixed
 one. `before` is `9f8baf2` exactly as gitdown.chat served it: that commit's CSS
@@ -65,35 +60,6 @@ npx wrangler d1 execute gitdown --local \
   --command "UPDATE issues SET state='open', resolved_at=NULL WHERE number=5"
 rm -rf .wrangler/state/v3/cache   # resolved issues are cached immutable
 ```
-
-### The `react-*`, `composer-identity-*` and `profile-menu-*` sets
-
-These five differ from the pairs above in that both halves were captured in the
-same session, against two servers running at once over **one** database — so a
-difference in the frames is a difference in the code and nothing else. `main` on
-`:8787` is the before; the branch on `:5173` is the after.
-
-```bash
-git worktree add /tmp/gitdown-before main
-cd /tmp/gitdown-before && npm install
-cp -R ../gitdown/.wrangler/state .wrangler/state   # same rows on both sides
-npx wrangler dev --test-scheduled --port 8787
-```
-
-The visitor is pinned rather than generated, by seeding `gd.session.id` /
-`.token` / `.name` into `localStorage` before each capture. Without that each
-frame invents its own session and the display name and avatar colour move
-between before and after for no reason at all.
-
-The two `react-*` pairs are the load-bearing ones: the port claims the views are
-unchanged, and a pair that differs anywhere except the header avatar means it
-isn't. That avatar is the one intended difference — it used to be a fixed purple
-and now draws the visitor's own colour from the same palette every other face on
-the site uses.
-
-`profile-menu-before` is not a menu: before this branch the avatar was dead
-chrome, so the same click that now opens the card used to land on the unicorn
-page. Both frames are that one click.
 
 ## The github.com side
 
