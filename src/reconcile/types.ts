@@ -136,6 +136,16 @@ export function isEmptyChange(change: IssueChange): boolean {
  */
 export interface IssueStore {
   loadByIncidentId(incidentId: string): Promise<StoredIssue | null>;
+  /**
+   * Incident ids of every issue we still believe is open.
+   *
+   * Reconcile is driven by the feed, so it can only ever learn about incidents
+   * the feed still contains. This is the one question that has to be asked of
+   * storage instead: resolution *removes* an incident from the live summary,
+   * so the only way to notice it is to compare what we hold open against what
+   * the feed still lists (see `poll` in ingest).
+   */
+  listOpenIncidentIds(): Promise<string[]>;
   apply(change: IssueChange): Promise<void>;
   getSyncState(key: string): Promise<string | null>;
   setSyncState(key: string, value: string): Promise<void>;

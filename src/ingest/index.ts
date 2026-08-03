@@ -4,6 +4,7 @@
  */
 import { fetchIncidents, fetchSummary, type ClientOptions } from "../statuspage/client.js";
 import { reconcile, type ReconcileResult } from "../reconcile/reconcile.js";
+import type { ParsedFeed } from "../statuspage/parse.js";
 import type { IssueStore } from "../reconcile/types.js";
 
 /** Set once the initial backfill has run, so it never repeats. */
@@ -54,12 +55,66 @@ export async function backfill(
   return result;
 }
 
-/** One poll of the live status page. */
+function merge(a: ReconcileResult, b: ReconcileResult): ReconcileResult {
+  return {
+    skipped: a.skipped && b.skipped,
+    opened: a.opened + b.opened,
+    changed: a.changed + b.changed,
+    closed: a.closed + b.closed,
+    unchanged: a.unchanged + b.unchanged,
+    rejected: [...a.rejected, ...b.rejected],
+  };
+}
+
+/**
+ * Close issues whose incident has left the summary feed.
+ *
+ * `summary.json` carries only *unresolved* incidents, so resolution is the one
+ * transition that removes an incident from the feed rather than showing up in
+ * it. Reconcile iterates the feed, so on its own it can never observe a close:
+ * the issue simply freezes at whatever the last poll saw.
+ *
+ * The fix has to run the comparison the other way round — what do we hold open
+ * that the feed no longer lists? Those ids, and only those, are then looked up
+ * in `incidents.json`, which does include resolved incidents. That feed is ~55x
+ * the size of the summary, which is why this is conditional: in the healthy case
+ * we hold nothing open, the divergence is empty, and no second request happens.
+ *
+ * Deliberately *not* gated on the page cursor. The summary reconcile advances
+ * the cursor before this runs, so a catch-up that fails would otherwise be
+ * locked out on every subsequent poll and the issue would stay open forever.
+ */
+async function catchUpResolved(
+  summary: ParsedFeed,
+  store: IssueStore,
+  options: IngestOptions,
+): Promise<ReconcileResult | null> {
+  const unresolved = new Set(summary.incidents.map((incident) => incident.id));
+  const missing = new Set(
+    (await store.listOpenIncidentIds()).filter((id) => !unresolved.has(id)),
+  );
+  if (missing.size === 0) return null;
+
+  const feed = await fetchIncidents(options);
+
+  // The cursor is disabled for the same reason backfill disables it: this feed
+  // has already been passed, and the whole point is to reprocess it.
+  return reconcile(
+    { ...feed, incidents: feed.incidents.filter((incident) => missing.has(incident.id)) },
+    store,
+    { usePageCursor: false },
+  );
+}
+
+/** One poll of the live status page, plus catch-up for anything it resolved. */
 export async function poll(
   store: IssueStore,
   options: IngestOptions = {},
 ): Promise<ReconcileResult> {
-  return reconcile(await fetchSummary(options), store);
+  const summary = await fetchSummary(options);
+  const result = await reconcile(summary, store);
+  const caughtUp = await catchUpResolved(summary, store, options);
+  return caughtUp ? merge(result, caughtUp) : result;
 }
 
 /** Backfill if needed, then poll. Called from the cron handler. */

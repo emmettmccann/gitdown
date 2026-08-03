@@ -132,3 +132,167 @@ describe("poll", () => {
     expect(result.rejected[0]!.id).toBe("broken");
   });
 });
+
+describe("catching up on incidents that resolved between polls", () => {
+  const RICH_ID = (richIncidentFixture as { id: string }).id;
+
+  /** A summary feed, with a page cursor that moves so polls are not skipped. */
+  function summaryAt(incidents: unknown[], tick: number): unknown {
+    const base = summaryFixture as { page: Record<string, unknown> };
+    return {
+      ...(summaryFixture as Record<string, unknown>),
+      page: { ...base.page, updated_at: `2026-07-20T04:${String(tick).padStart(2, "0")}:00.000Z` },
+      incidents,
+    };
+  }
+
+  /** The fixture as it stood before its resolving update was posted. */
+  function stillOpen(): unknown {
+    const raw = richIncidentFixture as Record<string, unknown>;
+    const updates = (raw["incident_updates"] as { status: string }[]).filter(
+      (update) => update.status !== "resolved",
+    );
+    return {
+      ...raw,
+      status: "monitoring",
+      resolved_at: null,
+      updated_at: "2026-07-20T04:43:50.571Z",
+      incident_updates: updates,
+    };
+  }
+
+  /** Routes by path, so a test can assert whether the big feed was fetched. */
+  function routedFetch(bodies: { summary: unknown; incidents?: unknown | Error }) {
+    const paths: string[] = [];
+    const fn = (async (input: RequestInfo | URL) => {
+      const url = String(input);
+      paths.push(new URL(url).pathname);
+      if (url.endsWith("/incidents.json")) {
+        if (bodies.incidents === undefined) throw new Error("unexpected incidents.json fetch");
+        if (bodies.incidents instanceof Error) throw bodies.incidents;
+        return Response.json(bodies.incidents);
+      }
+      return Response.json(bodies.summary);
+    }) as typeof fetch;
+    return { fetch: fn, paths };
+  }
+
+  /** The archive feed, which — unlike the summary — keeps resolved incidents. */
+  const archive = {
+    ...(incidentsFixture as Record<string, unknown>),
+    incidents: [richIncidentFixture],
+  };
+
+  it("closes an issue whose incident vanished from the summary feed", async () => {
+    // The regression: resolution is the one transition that *removes* an
+    // incident from summary.json, so reconcile alone can never see it.
+    const store = new MemoryIssueStore();
+
+    await poll(store, { fetch: routedFetch({ summary: summaryAt([stillOpen()], 1) }).fetch });
+    expect(store.issue(RICH_ID)!.state).toBe("open");
+
+    const result = await poll(store, {
+      fetch: routedFetch({ summary: summaryAt([], 2), incidents: archive }).fetch,
+    });
+
+    expect(result.closed).toBe(1);
+    const issue = store.issue(RICH_ID)!;
+    expect(issue.state).toBe("closed");
+    expect(issue.status).toBe("resolved");
+    expect(issue.resolvedAt).not.toBeNull();
+    expect(store.kinds(RICH_ID).at(-1)).toBe("closed");
+  });
+
+  it("writes the resolving update as a comment, not just the close", async () => {
+    const store = new MemoryIssueStore();
+
+    await poll(store, { fetch: routedFetch({ summary: summaryAt([stillOpen()], 1) }).fetch });
+    const before = store.kinds(RICH_ID).filter((kind) => kind === "status_update").length;
+
+    await poll(store, {
+      fetch: routedFetch({ summary: summaryAt([], 2), incidents: archive }).fetch,
+    });
+
+    const after = store.kinds(RICH_ID).filter((kind) => kind === "status_update").length;
+    expect(after).toBe(before + 1);
+  });
+
+  it("does not fetch the archive when the summary explains every open issue", async () => {
+    // The common case by far, and the expensive feed is ~55x the summary.
+    const store = new MemoryIssueStore();
+
+    await poll(store, { fetch: routedFetch({ summary: summaryAt([stillOpen()], 1) }).fetch });
+
+    const routed = routedFetch({ summary: summaryAt([stillOpen()], 2) });
+    await poll(store, { fetch: routed.fetch });
+
+    expect(routed.paths).toEqual(["/api/v2/summary.json"]);
+  });
+
+  it("does not fetch the archive when nothing is open at all", async () => {
+    const store = new MemoryIssueStore();
+    const routed = routedFetch({ summary: summaryAt([], 1) });
+
+    await poll(store, { fetch: routed.fetch });
+
+    expect(routed.paths).toEqual(["/api/v2/summary.json"]);
+  });
+
+  it("retries the catch-up even though the page cursor already advanced", async () => {
+    // The summary reconcile advances the cursor before catch-up runs. If the
+    // catch-up were cursor-gated, one failed fetch would strand the issue open
+    // permanently — which is the very bug this whole path exists to fix.
+    const store = new MemoryIssueStore();
+
+    await poll(store, { fetch: routedFetch({ summary: summaryAt([stillOpen()], 1) }).fetch });
+
+    const failing = summaryAt([], 2);
+    await expect(
+      poll(store, { fetch: routedFetch({ summary: failing, incidents: new Error("down") }).fetch }),
+    ).rejects.toThrow(/down/);
+    expect(store.issue(RICH_ID)!.state).toBe("open");
+
+    // Same summary as the failed run, so the cursor short-circuits reconcile.
+    const routed = routedFetch({ summary: failing, incidents: archive });
+    const result = await poll(store, { fetch: routed.fetch });
+
+    expect(routed.paths).toContain("/api/v2/incidents.json");
+    expect(result.closed).toBe(1);
+    expect(store.issue(RICH_ID)!.state).toBe("closed");
+  });
+
+  it("leaves the issue open when the archive says it is still unresolved", async () => {
+    // A transient absence from the summary is not a resolution.
+    const store = new MemoryIssueStore();
+
+    await poll(store, { fetch: routedFetch({ summary: summaryAt([stillOpen()], 1) }).fetch });
+
+    const result = await poll(store, {
+      fetch: routedFetch({
+        summary: summaryAt([], 2),
+        incidents: { ...(incidentsFixture as Record<string, unknown>), incidents: [stillOpen()] },
+      }).fetch,
+    });
+
+    expect(result.closed).toBe(0);
+    expect(store.issue(RICH_ID)!.state).toBe("open");
+  });
+
+  it("only reconciles the incidents that went missing", async () => {
+    // The archive carries ~50 incidents spanning months; reconciling all of
+    // them every time would cost a storage read apiece for no reason.
+    const store = new MemoryIssueStore();
+
+    await poll(store, { fetch: routedFetch({ summary: summaryAt([stillOpen()], 1) }).fetch });
+    expect(store.issueCount).toBe(1);
+
+    const result = await poll(store, {
+      fetch: routedFetch({ summary: summaryAt([], 2), incidents: incidentsFixture }).fetch,
+    });
+
+    // Ours closed; every other incident in the archive stayed unknown.
+    expect(result.closed).toBe(1);
+    expect(store.issue(RICH_ID)!.state).toBe("closed");
+    expect(store.issueCount).toBe(1);
+  });
+});

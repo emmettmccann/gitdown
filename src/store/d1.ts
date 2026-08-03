@@ -125,6 +125,15 @@ export class D1IssueStore implements IssueStore {
     };
   }
 
+  async listOpenIncidentIds(): Promise<string[]> {
+    // Served by idx_issues_state_number, which leads on state — and in the
+    // healthy case (GitHub is fine) this matches no rows at all.
+    const result = await this.db
+      .prepare(`SELECT incident_id FROM issues WHERE state = 'open'`)
+      .all<{ incident_id: string }>();
+    return result.results.map((row) => row.incident_id);
+  }
+
   async apply(change: IssueChange): Promise<void> {
     const statements = [this.upsertIssue(change.incidentId, change.patch)];
 

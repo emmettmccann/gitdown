@@ -263,6 +263,25 @@ describe("backfill ordering", () => {
   });
 });
 
+describe("listing open incidents", () => {
+  it("returns nothing when everything is closed", async () => {
+    const store = new D1IssueStore(env.DB);
+    await reconcile(feedAt([RICH], 0), store); // RICH is resolved upstream
+
+    expect(await store.listOpenIncidentIds()).toEqual([]);
+  });
+
+  it("returns the incident ids still open, and drops them once closed", async () => {
+    const store = new D1IssueStore(env.DB);
+
+    await reconcile(feedAt([snapshotAfter(RICH, 1)], 0), store);
+    expect(await store.listOpenIncidentIds()).toEqual([RICH.id]);
+
+    await reconcile(feedAt([RICH], 1), store);
+    expect(await store.listOpenIncidentIds()).toEqual([]);
+  });
+});
+
 describe("sync state", () => {
   it("round-trips and overwrites", async () => {
     const store = new D1IssueStore(env.DB);
