@@ -4,28 +4,38 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-07-30",
 
-  // The browser bundle is a build artifact under `public/js/`, which is
-  // gitignored — so it exists only because something built it, while the pages
-  // and the stylesheet that position its markup are tracked and always current.
-  // `wrangler deploy` uploads `./public` as it finds it, so a deploy that
-  // skipped the build shipped a bundle from a different generation than the CSS
-  // and nothing complained. Building here rather than in the npm script means
-  // every path into wrangler rebuilds it, including a bare `wrangler deploy`.
+  // The front end is a build artifact under `dist/`, which is gitignored — so
+  // it exists only because something built it. `wrangler deploy` uploads the
+  // assets directory as it finds it, so a deploy that skipped the build would
+  // ship whatever happened to be lying there, or nothing at all, and no step
+  // would complain. Building here rather than in the npm script means every
+  // path into wrangler rebuilds it first: `deploy`, `dev`, and the bare
+  // `wrangler versions upload` that Cloudflare's build pipeline runs.
+  //
+  // Vite emits the shell, the bundle and the stylesheet together under hashed
+  // names, so the three can no longer be from different generations either.
+  //
+  // `vite dev` prints a warning that it is ignoring this, which is correct and
+  // wanted: in dev the Vite plugin serves the front end itself and there is
+  // nothing to prebuild. The key is only here for the paths that go through the
+  // wrangler CLI. Deleting it to silence the warning breaks the deploy.
   "build": {
-    "command": "npm run build:client"
+    "command": "npm run build"
   },
 
-  // Static assets are served directly by the edge without invoking the Worker,
-  // and are never billed. Only requests that match no asset reach `fetch`.
   // A request matching a static file is served by the edge without invoking the
   // Worker, and is never billed. Anything else falls through to `fetch`, which
   // is how /issues/:n gets a real URL rather than a query parameter.
   "assets": {
-    "directory": "./public",
+    "directory": "./dist/client",
     "binding": "ASSETS",
-    // Without this the asset router claims /issues/6 before the Worker sees it
-    // and redirects to /issue. These two prefixes always invoke the Worker;
-    // everything else (CSS, JS, images) is still served free and uncounted.
+    // Without this the asset router answers /issues/6 itself before the Worker
+    // sees it. These three prefixes always invoke the Worker; everything else
+    // (CSS, JS, images) is still served free and uncounted.
+    //
+    // The Worker returns the same SPA shell for /issues/* and /503, and for
+    // anything that matched nothing — what differs is the status code, which is
+    // the whole reason those two do not use `not_found_handling`.
     "run_worker_first": ["/issues/*", "/api/*", "/503"]
   },
 

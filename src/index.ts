@@ -23,26 +23,25 @@ export default {
 
     // /issues/6 is not a file, so it lands here (see run_worker_first in
     // wrangler.jsonc). Serving the shell lets issue URLs look like GitHub's
-    // rather than carrying a query parameter; the client reads the number back
-    // out of the path.
-    //
-    // Ask for "/issue", not "/issue.html": the asset router canonicalises
-    // extension-ful URLs by redirecting to the extensionless form, and that
-    // redirect would be passed straight through to the browser.
+    // rather than carrying a query parameter; the client router reads the
+    // number back out of the path.
     if (ISSUE_PAGE.test(pathname)) {
-      return env.ASSETS.fetch(new Request(new URL("/issue", request.url), request));
+      return shell(request, env, 200);
     }
 
     // The joke page is linked to deliberately from every dead control, so it
-    // gets the status code it is named after rather than a 200.
+    // gets the status code it is named after rather than a 200. That code is
+    // the reason dead chrome leaves the page for real instead of routing in the
+    // client — a client-side navigation would render the joke behind a 200.
     if (pathname === "/503") {
-      return oopsPage(request, env, 503);
+      return shell(request, env, 503);
     }
 
-    // Anything else that matched a static asset never reached this handler, so
-    // a request here really is a miss — and a real miss deserves the unicorn
-    // just as much as a decorative one.
-    return oopsPage(request, env, 404);
+    // Anything that matched a static asset never reached this handler, so a
+    // request here really is a miss — and a real miss deserves the unicorn just
+    // as much as a decorative one. The shell renders it either way; only the
+    // status code says which happened.
+    return shell(request, env, 404);
   },
 
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
@@ -51,14 +50,16 @@ export default {
 } satisfies ExportedHandler<Env>;
 
 /**
- * Serves the unicorn page under a chosen status code.
+ * Serves the single-page shell under a chosen status code.
  *
- * Asked for "/503" without the extension for the same reason as the issue
- * shell: the asset router redirects extension-ful URLs to the extensionless
- * form, and that redirect would reach the browser instead of the page.
+ * One document backs every route now, so which page a visitor gets is the
+ * router's business and the status code is this handler's. Asked for "/", not
+ * "/index.html": the asset router canonicalises extension-ful URLs by
+ * redirecting to the extensionless form, and that redirect would be passed
+ * straight through to the browser.
  */
-async function oopsPage(request: Request, env: Env, status: number): Promise<Response> {
-  const asset = await env.ASSETS.fetch(new Request(new URL("/503", request.url), request));
+async function shell(request: Request, env: Env, status: number): Promise<Response> {
+  const asset = await env.ASSETS.fetch(new Request(new URL("/", request.url), request));
   return new Response(asset.body, { status, headers: asset.headers });
 }
 
