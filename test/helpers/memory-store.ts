@@ -66,6 +66,12 @@ export class MemoryIssueStore implements IssueStore {
     };
   }
 
+  async listOpenIncidentIds(): Promise<string[]> {
+    return [...this.issues.values()]
+      .filter((issue) => issue.state === "open")
+      .map((issue) => issue.incidentId);
+  }
+
   async apply(change: IssueChange): Promise<void> {
     this.applyCount += 1;
 
