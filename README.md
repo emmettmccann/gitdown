@@ -52,7 +52,9 @@ Note that the backfill only runs once per database — the reset above is how yo
 npm run deploy
 ```
 
-That is `vite build && wrangler deploy`. The build emits the shell, the bundle and the stylesheet together into `dist/client/` with content-hashed filenames, and `wrangler.jsonc` deliberately has no `assets.directory` — the Vite plugin supplies it from that build. So there is no way to ship a page and a bundle from different generations, and a `wrangler deploy` that skipped the build has nothing to point at and fails outright rather than uploading a stale one.
+Vite builds the front end into `dist/client/`; wrangler bundles the Worker. Neither half can go out stale: `wrangler.jsonc` carries a `build.command`, so **every** path into wrangler rebuilds the client first — `deploy`, `dev`, and the bare `wrangler versions upload` that Cloudflare's build pipeline runs — and Vite emits the shell, the bundle and the stylesheet together under content-hashed names, so the three cannot be from different generations.
+
+The Cloudflare Vite plugin is loaded for `vite dev` only. At build time it would take over the Worker too and redirect wrangler to a generated config under `dist/` — but that redirect is written *by* the build, so a `wrangler deploy` on a fresh checkout resolves its config before the file exists and fails on the missing `assets.directory`. Keeping the build plain is what makes the checked-in `wrangler.jsonc` the single source of truth for a deploy, whoever starts one.
 
 ## API
 

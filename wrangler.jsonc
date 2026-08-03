@@ -4,15 +4,30 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-07-30",
 
+  // The front end is a build artifact under `dist/`, which is gitignored — so
+  // it exists only because something built it. `wrangler deploy` uploads the
+  // assets directory as it finds it, so a deploy that skipped the build would
+  // ship whatever happened to be lying there, or nothing at all, and no step
+  // would complain. Building here rather than in the npm script means every
+  // path into wrangler rebuilds it first: `deploy`, `dev`, and the bare
+  // `wrangler versions upload` that Cloudflare's build pipeline runs.
+  //
+  // Vite emits the shell, the bundle and the stylesheet together under hashed
+  // names, so the three can no longer be from different generations either.
+  //
+  // `vite dev` prints a warning that it is ignoring this, which is correct and
+  // wanted: in dev the Vite plugin serves the front end itself and there is
+  // nothing to prebuild. The key is only here for the paths that go through the
+  // wrangler CLI. Deleting it to silence the warning breaks the deploy.
+  "build": {
+    "command": "npm run build"
+  },
+
   // A request matching a static file is served by the edge without invoking the
   // Worker, and is never billed. Anything else falls through to `fetch`, which
   // is how /issues/:n gets a real URL rather than a query parameter.
-  //
-  // There is no `directory` here on purpose: @cloudflare/vite-plugin points it
-  // at the client build output, so the shell, the bundle and the stylesheet are
-  // always from the same generation and there is no way to deploy a stale one.
-  // A bare `wrangler deploy` without a build has nothing to upload and says so.
   "assets": {
+    "directory": "./dist/client",
     "binding": "ASSETS",
     // Without this the asset router answers /issues/6 itself before the Worker
     // sees it. These three prefixes always invoke the Worker; everything else
