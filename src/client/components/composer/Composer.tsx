@@ -17,7 +17,7 @@ import { useComment } from "../../api/queries.js";
 import { useSession } from "../../lib/session.js";
 import { Button } from "../ui/button.js";
 import { DeadButton, DeadLink } from "../ui/dead.js";
-import { BookIcon, IssueClosedSplitIcon, PaperclipIcon } from "../ui/icons.js";
+import { BookIcon, IssueClosedSplitIcon } from "../ui/icons.js";
 import { IdentityBar } from "./IdentityBar.js";
 import { MarkdownToolbar } from "./MarkdownToolbar.js";
 
@@ -78,7 +78,6 @@ export function Composer({ issueNumber }: { issueNumber: number }) {
   return (
     <div className="add-comment">
       <h2>Add a comment</h2>
-      <IdentityBar />
 
       <form className="composer" onSubmit={send}>
         <MarkdownToolbar />
@@ -92,10 +91,7 @@ export function Composer({ issueNumber }: { issueNumber: number }) {
         />
 
         <div className="composer-footer">
-          <span className="attach">
-            <PaperclipIcon />
-            Paste, drop, or click to add files
-          </span>
+          <IdentityBar />
           <div className="composer-actions">
             <div className="btn-group">
               <DeadButton variant="default">

@@ -7,7 +7,9 @@
  * Fork that the signed-out views carry is gone entirely.
  */
 import { Link } from "react-router";
+import { SOURCE_URL } from "../../lib/constants.js";
 import { DeadButton, deadHandlers } from "../ui/dead.js";
+import { ProfileMenu } from "./ProfileMenu.js";
 import {
   GitPullRequestIcon,
   InboxIcon,
@@ -36,7 +38,7 @@ export function GlobalHeader() {
           gitdown
         </a>
         <span className="sep">/</span>
-        <a className="name" href="https://github.com/emmettmccann/gitdown" rel="noopener">
+        <a className="name" href={SOURCE_URL} rel="noopener">
           gitdown
         </a>
         <DeadButton
@@ -83,9 +85,8 @@ export function GlobalHeader() {
           <InboxIcon />
           <span className="unread-dot" />
         </DeadButton>
-        <DeadButton variant="bare" className="avatar-btn" aria-label="Open user account menu">
-          <span className="avatar-me" />
-        </DeadButton>
+        {/* The one control in this cluster that leads somewhere. */}
+        <ProfileMenu />
       </div>
     </header>
   );

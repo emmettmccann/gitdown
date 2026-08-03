@@ -140,11 +140,15 @@ kbd {
   border: 2px solid var(--color-canvas-default);
 }
 .avatar-btn { background: none; border: none; padding: 0 0 0 4px; cursor: pointer; display: flex; }
+/* Carries the `avatar` class as well, so it draws the visitor's own colour from
+   the filler palette below rather than this default — the face on the button
+   and the face inside the account menu are then the same person. */
 .avatar-me {
   width: 26px; height: 26px; border-radius: 50%;
   background: #b392f0;
   display: inline-block;
 }
+.avatar-btn[data-state="open"] .avatar-me { box-shadow: 0 0 0 2px var(--color-accent-emphasis); }
 
 .btn {
   display: inline-flex; align-items: center; gap: 4px;
@@ -713,10 +717,15 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
 .add-comment h2 { font-size: 16px; margin: 0 0 8px; }
 
 /* Who you are posting as. The real page knows because you signed in; here it is
-   a name held in localStorage, so it has to be stated rather than assumed. */
+   a name held in localStorage, so it has to be stated rather than assumed.
+
+   It sits on the composer's footer line, in the slot the real composer gives to
+   "Paste, drop, or click to add files" — an offer gitdown cannot make, and the
+   only line on the card that was pure decoration. Same size and colour as the
+   hint it replaced, so the footer reads the same weight it always did. */
 .composer-identity {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  margin-bottom: 8px;
+  min-width: 0;
   font-size: 12px; color: var(--color-fg-muted);
 }
 .composer-identity .avatar { width: 20px; height: 20px; }
@@ -807,18 +816,78 @@ a.label-chip:hover { text-decoration: none; filter: brightness(0.95); }
   flex-wrap: wrap;
   padding: 8px 12px 12px;
 }
-.composer-footer .attach {
-  display: flex; align-items: center; gap: 6px;
-  color: var(--color-fg-muted); font-size: 12px;
-}
-.composer-footer .attach .octicon { transform: rotate(90deg); }
-.composer-actions { display: flex; align-items: center; gap: 8px; }
+.composer-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .composer-note {
   display: flex; align-items: center; gap: 8px;
   color: var(--color-fg-muted);
   font-size: 12px;
   margin-top: 12px;
 }
+
+/* ---- account menu ---- */
+/* github.com hangs a long menu off this avatar; almost every entry on it is
+   something gitdown has no version of. Rather than fill the card with more dead
+   chrome it carries the three links that go somewhere real, and the one control
+   that does something — the name you post under.
+
+   Rendered in a portal at the end of <body>, so nothing in the header cascades
+   into it and every rule it needs is here. */
+.profile-menu {
+  min-width: 288px;
+  max-width: calc(100vw - 16px);
+  background: var(--color-canvas-default);
+  border: 1px solid var(--color-border-default);
+  /* Rounder than the page's 6px, the way overlay surfaces are on github.com. */
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(66, 74, 83, 0.12), 0 1px 3px rgba(27, 31, 36, 0.12);
+  padding: 8px;
+  font-size: 14px;
+  z-index: 100;
+}
+.profile-menu-header {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px;
+}
+/* Size only, no fill: the colour comes from the filler palette above, and a
+   fallback here would be a later rule of equal specificity beating it. */
+.profile-menu-header .avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+/* A display name is whatever the visitor typed, so it has to be able to break
+   rather than push Change off the edge of the card. */
+.profile-menu-header .who {
+  font-weight: 600;
+  color: var(--color-fg-default);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.profile-menu-header .btn-link { margin-left: auto; font-size: 14px; }
+.profile-menu-header .identity-edit { flex: 1; min-width: 0; }
+.profile-menu-header .identity-edit input { flex: 1; min-width: 0; font-size: 14px; }
+.profile-menu-error {
+  padding: 0 8px 8px;
+  font-size: 12px;
+  color: var(--color-danger-fg);
+}
+/* Full-bleed, so the rule reaches the card's edges the way a menu divider does
+   rather than stopping at the padding. */
+.profile-menu-separator {
+  height: 1px;
+  background: var(--color-border-muted);
+  margin: 4px -8px 8px;
+}
+.profile-menu-links { display: flex; flex-direction: column; }
+.profile-menu-links a {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius);
+  color: var(--color-fg-default);
+}
+.profile-menu-links a:hover { background: var(--color-canvas-subtle); text-decoration: none; }
+.profile-menu-links a:focus-visible { background: var(--color-canvas-subtle); outline: none; }
+.profile-menu-links .octicon { color: var(--color-fg-muted); flex-shrink: 0; }
 
 /* ---- narrow screens ---- */
 /* Below this the sidebars stop earning their width. `align-items` has to be
