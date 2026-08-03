@@ -1,11 +1,13 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useParams } from "react-router";
+import { ApiError } from "../api/client.js";
 import { useThread } from "../api/queries.js";
 import { AppShell } from "../components/chrome/AppShell.js";
 import { Composer } from "../components/composer/Composer.js";
 import { IssueHeader, type IssueMeta } from "../components/issue/IssueHeader.js";
 import { IssueMetaSidebar } from "../components/issue/IssueMetaSidebar.js";
 import { Timeline } from "../components/issue/Timeline.js";
+import { DEAD_HREF } from "../components/ui/dead.js";
 import { useDocumentTitle } from "../lib/useDocumentTitle.js";
 
 interface PageProps {
@@ -49,19 +51,29 @@ export function IssuePage() {
   const thread = useThread(issueNumber, valid);
   const issue = thread.data;
 
+  /**
+   * A number nobody ever opened an incident for, or one that is not a number at
+   * all. Either way it is a link to something that is not there, and every
+   * other link to something that is not there lands on the unicorn.
+   *
+   * Only a 404 counts. A 500 or a dropped connection means the issue may well
+   * exist and the site is having the sort of morning it exists to document —
+   * throwing the URL away over that would be the wrong trade.
+   */
+  const gone = !valid || (thread.error instanceof ApiError && thread.error.status === 404);
+
+  useEffect(() => {
+    // `replace`, not `assign`: this is a redirect rather than a click, so Back
+    // should return wherever they came from instead of a URL that bounces them
+    // straight back here. Leaving the page for real is also what gets the
+    // status code — the Worker answers /503 with it and a client-side hop
+    // would render the joke behind a 200.
+    if (gone) window.location.replace(DEAD_HREF);
+  }, [gone]);
+
   useDocumentTitle(
     issue ? `${issue.title} · Issue #${issue.number} · gitdown` : "Issue · gitdown/gitdown",
   );
-
-  if (!valid) {
-    return (
-      <Page title="Issue" number={null}>
-        <div className="timeline">
-          <div className="empty-state">That is not an issue number.</div>
-        </div>
-      </Page>
-    );
-  }
 
   // Data first: a poll that fails on a thread already on screen is not a reason
   // to replace it with an error. The page keeps everything it had, and the next
@@ -93,16 +105,19 @@ export function IssuePage() {
     );
   }
 
-  if (thread.isError) {
+  if (thread.isError && !gone) {
     return (
       <Page title="Issue" number={issueNumber}>
         <div className="timeline">
-          <div className="empty-state">Issue #{issueNumber} does not exist.</div>
+          <div className="empty-state">
+            Could not load this issue. GitHub might not be the only thing that's down.
+          </div>
         </div>
       </Page>
     );
   }
 
+  // Waiting: either on the thread, or on the redirect that is already leaving.
   return (
     <Page title="Loading…" number={null}>
       <div className="timeline">
