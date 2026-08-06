@@ -38,6 +38,8 @@ export interface ReconcileResult {
   closed: number;
   /** Incidents examined but found unchanged. */
   unchanged: number;
+  /** Incidents whose payload predated what we already hold, and was dropped. */
+  stale: number;
   /** Incidents dropped at the validation boundary, carried through to logs. */
   rejected: ParsedFeed["rejected"];
 }
@@ -49,6 +51,7 @@ function emptyResult(feed: ParsedFeed, skipped: boolean): ReconcileResult {
     changed: 0,
     closed: 0,
     unchanged: 0,
+    stale: 0,
     rejected: feed.rejected,
   };
 }
@@ -60,6 +63,22 @@ async function reconcileIncident(
   result: ReconcileResult,
 ): Promise<void> {
   const stored = await store.loadByIncidentId(incident.id);
+
+  // Statuspage is served from a CDN, and a poll can be handed a copy of the
+  // incident older than the one we already folded in. Most of what the diff
+  // would then do is harmless — appends and amendments are keyed by upstream id
+  // and simply land again — but one thing is not: an update we hold and the
+  // stale copy predates reads as "the operator deleted it", and the row is
+  // struck through for good.
+  //
+  // A payload behind the one we last applied has nothing to tell us, so it is
+  // dropped whole. Deliberately *not* behind `fastPath`: that flag marks a cost
+  // optimisation the tests turn off to prove correctness does not rest on it,
+  // and this is not one.
+  if (stored && incident.updated_at < stored.srcUpdatedAt) {
+    result.stale += 1;
+    return;
+  }
 
   if (stored && fastPath && stored.srcUpdatedAt === incident.updated_at) {
     result.unchanged += 1;

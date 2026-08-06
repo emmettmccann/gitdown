@@ -118,6 +118,14 @@ export interface IssueChange {
   amend: AmendedUpdate[];
   /** Timeline ids to soft-delete: present last sync, absent now. */
   remove: string[];
+  /**
+   * Timeline ids to un-delete: marked deleted here, present upstream again.
+   *
+   * Statuspage does not resurrect updates, so in practice this only ever undoes
+   * a deletion of our own that should not have happened — see the note on
+   * `remove` in diff.ts.
+   */
+  restore: string[];
 }
 
 export function isEmptyChange(change: IssueChange): boolean {
@@ -125,7 +133,8 @@ export function isEmptyChange(change: IssueChange): boolean {
     !change.isNew &&
     change.append.length === 0 &&
     change.amend.length === 0 &&
-    change.remove.length === 0
+    change.remove.length === 0 &&
+    change.restore.length === 0
   );
 }
 

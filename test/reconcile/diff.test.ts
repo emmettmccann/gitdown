@@ -288,3 +288,44 @@ describe("labels", () => {
     expect(labels).toContain("Actions");
   });
 });
+
+describe("an update that reappears upstream", () => {
+  it("is restored rather than left struck through", () => {
+    const vanished = RICH.incident_updates[2]!.id;
+    const stored = storedFrom(RICH, {
+      knownUpdates: RICH.incident_updates.map((u) => ({
+        id: u.id,
+        updatedAt: u.updated_at,
+        deleted: u.id === vanished,
+      })),
+    });
+
+    const change = diffIncident(RICH, stored);
+
+    expect(change.restore).toEqual([vanished]);
+    expect(change.remove).toEqual([]);
+    // Restored, not re-appended: a second copy would be worse than the first
+    // problem, and the row still holds its body.
+    expect(change.append.filter((e) => e.kind === "status_update")).toEqual([]);
+  });
+
+  it("leaves an update that is still absent alone", () => {
+    const vanished = RICH.incident_updates[2]!;
+    const stored = storedFrom(RICH, {
+      knownUpdates: RICH.incident_updates.map((u) => ({
+        id: u.id,
+        updatedAt: u.updated_at,
+        deleted: u.id === vanished.id,
+      })),
+    });
+    const trimmed: Incident = {
+      ...RICH,
+      incident_updates: RICH.incident_updates.filter((u) => u.id !== vanished.id),
+    };
+
+    const change = diffIncident(trimmed, stored);
+
+    expect(change.restore).toEqual([]);
+    expect(change.remove).toEqual([]);
+  });
+});

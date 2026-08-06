@@ -88,6 +88,9 @@ async function runIngestion(env: Env): Promise<void> {
         changed: result.changed,
         closed: result.closed,
         unchanged: result.unchanged,
+        // Non-zero means the CDN handed us a copy older than what we hold. A
+        // few is normal; a lot means the poll is routinely reading behind.
+        stale: result.stale,
         rejected: result.rejected.length,
       }),
     );

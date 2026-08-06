@@ -182,6 +182,7 @@ function diffNewIncident(incident: Incident): IssueChange {
     append,
     amend: [],
     remove: [],
+    restore: [],
   };
 }
 
@@ -209,9 +210,27 @@ function diffKnownIncident(incident: Incident, stored: StoredIssue): IssueChange
 
   // Present last sync, absent now: the operator deleted the update. Soft-delete
   // rather than dropping the row, so the timeline keeps its shape.
+  //
+  // "Absent" is a claim about one payload, and Statuspage is served from a CDN,
+  // so a poll can be handed a copy predating an update we already stored — the
+  // newest one, most often, since that is the only one a slightly stale copy can
+  // be missing. `reconcile` drops payloads older than what we hold, which is
+  // where that is supposed to be caught; this stays a straight comparison so it
+  // cannot also quietly depend on it.
   const incoming = new Set(incident.incident_updates.map((u) => u.id));
   const remove = stored.knownUpdates
     .filter((u) => !u.deleted && !incoming.has(u.id))
+    .map((u) => u.id)
+    .sort();
+
+  // Deleted here, present upstream again. Statuspage has no un-delete, so this
+  // is almost always a deletion of ours that should never have happened —
+  // whatever the cause, upstream is the authority and the row comes back. It
+  // also means a bad delete is repaired by the next poll rather than being
+  // permanent, which is the property that actually matters: soft-deleting is
+  // cheap to undo only if something ever undoes it.
+  const restore = stored.knownUpdates
+    .filter((u) => u.deleted && incoming.has(u.id))
     .map((u) => u.id)
     .sort();
 
@@ -251,6 +270,7 @@ function diffKnownIncident(incident: Incident, stored: StoredIssue): IssueChange
     append,
     amend,
     remove,
+    restore,
   };
 }
 
