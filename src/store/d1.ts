@@ -158,6 +158,15 @@ export class D1IssueStore implements IssueStore {
           .bind(id, this.now()),
       );
     }
+    // The row's body was never dropped, only hidden, so putting it back is one
+    // column — which is the whole reason deletion is soft.
+    for (const id of change.restore) {
+      statements.push(
+        this.db
+          .prepare(`UPDATE timeline SET deleted_at = NULL WHERE id = ?1 AND deleted_at IS NOT NULL`)
+          .bind(id),
+      );
+    }
 
     await this.db.batch(statements);
   }

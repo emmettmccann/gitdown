@@ -62,6 +62,7 @@ function merge(a: ReconcileResult, b: ReconcileResult): ReconcileResult {
     changed: a.changed + b.changed,
     closed: a.closed + b.closed,
     unchanged: a.unchanged + b.unchanged,
+    stale: a.stale + b.stale,
     rejected: [...a.rejected, ...b.rejected],
   };
 }

@@ -280,3 +280,100 @@ describe("reporting", () => {
     expect(noop.unchanged).toBe(1);
   });
 });
+
+describe("a poll served a stale copy", () => {
+  // Statuspage sits behind a CDN, so a poll can be handed a copy of an incident
+  // from before an update we have already stored — the newest one, most often,
+  // since that is the only one a slightly stale copy can be missing.
+  //
+  // Left alone this put "This comment was removed upstream." on live threads:
+  // the absent update read as an operator deletion, the row was struck through,
+  // and nothing ever put it back. Both halves are covered here — not taking the
+  // stale copy's word for it, and recovering if something already has.
+  const stale = snapshotAfter(RICH, 5);
+  const fresh = snapshotAfter(RICH, 6);
+  const newestId = fresh.incident_updates.at(-1)!.id;
+
+  const deletedAtOf = (store: MemoryIssueStore, id: string) =>
+    store.timeline(RICH.id).find((row) => row.event.id === id)?.deletedAt;
+
+  it("does not read the missing newest update as a deletion", async () => {
+    const store = new MemoryIssueStore();
+    await reconcile(feedFrom([fresh], 1), store);
+
+    const result = await reconcile(feedFrom([stale], 2), store);
+
+    expect(result.stale).toBe(1);
+    expect(deletedAtOf(store, newestId)).toBeUndefined();
+  });
+
+  it("drops the stale copy whole rather than half-applying it", async () => {
+    const store = new MemoryIssueStore();
+    await reconcile(feedFrom([fresh], 1), store);
+    const before = { ...store.issue(RICH.id)! };
+    const kindsBefore = store.kinds(RICH.id);
+    const writesBefore = store.applyCount;
+
+    await reconcile(feedFrom([stale], 2), store);
+
+    // Notably `srcUpdatedAt`: rolling it backwards would make the next fresh
+    // poll re-diff an incident it has already applied. The label diff is the
+    // other half — a stale impact would flap the labels off and back on.
+    expect(store.issue(RICH.id)).toEqual(before);
+    expect(store.kinds(RICH.id)).toEqual(kindsBefore);
+    expect(store.applyCount).toBe(writesBefore);
+  });
+
+  it("is not the fast path in disguise", async () => {
+    // `fastPath` is a cost optimisation the other tests switch off to prove
+    // correctness does not rest on it. Refusing a stale payload is not one, so
+    // it has to hold with the flag off too.
+    const store = new MemoryIssueStore();
+    await reconcile(feedFrom([fresh], 1), store, { fastPath: false });
+
+    await reconcile(feedFrom([stale], 2), store, { fastPath: false });
+
+    expect(deletedAtOf(store, newestId)).toBeUndefined();
+  });
+
+  it("puts back a row an earlier poll had already struck through", async () => {
+    const store = new MemoryIssueStore();
+    await reconcile(feedFrom([fresh], 1), store);
+
+    // The damage as it exists in production, applied directly: the guard above
+    // is what stops it happening now, so it cannot be reproduced through it.
+    await store.apply({
+      incidentId: RICH.id,
+      isNew: false,
+      patch: diffIncident(fresh, null).patch,
+      append: [],
+      amend: [],
+      remove: [newestId],
+      restore: [],
+    });
+    expect(deletedAtOf(store, newestId)).toBeDefined();
+
+    await reconcile(feedFrom([snapshotAfter(RICH, 7)], 2), store);
+
+    expect(deletedAtOf(store, newestId)).toBeUndefined();
+  });
+
+  it("still soft-deletes an update the operator really did remove", async () => {
+    const store = new MemoryIssueStore();
+    await reconcile(feedFrom([fresh], 1), store);
+
+    // Same payload minus one update, with the bumped `updated_at` a real
+    // deletion carries — so it is current, not stale.
+    const dropped = fresh.incident_updates[2]!.id;
+    const edited: Incident = {
+      ...fresh,
+      updated_at: fresh.updated_at + 1_000,
+      incident_updates: fresh.incident_updates.filter((u) => u.id !== dropped),
+    };
+
+    const result = await reconcile(feedFrom([edited], 2), store);
+
+    expect(result.stale).toBe(0);
+    expect(deletedAtOf(store, dropped)).toBeDefined();
+  });
+});

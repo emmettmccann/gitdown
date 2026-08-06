@@ -116,6 +116,11 @@ export class MemoryIssueStore implements IssueStore {
       const row = this.rows.find((r) => r.event.id === id);
       if (row) row.deletedAt = Date.now();
     }
+
+    for (const id of change.restore) {
+      const row = this.rows.find((r) => r.event.id === id);
+      if (row) delete row.deletedAt;
+    }
   }
 
   async getSyncState(key: string): Promise<string | null> {

@@ -196,6 +196,35 @@ describe("amendments and deletions", () => {
     // Row kept, not dropped: the timeline keeps its shape.
     expect(await rows("SELECT seq FROM timeline WHERE id = ?1", removed.id)).toHaveLength(1);
   });
+
+  it("un-deletes an update that comes back upstream", async () => {
+    const store = new D1IssueStore(env.DB);
+    await store.apply(diffIncident(RICH, null));
+
+    const vanished = RICH.incident_updates[2]!;
+    const trimmed: Incident = {
+      ...RICH,
+      updated_at: RICH.updated_at + 1000,
+      incident_updates: RICH.incident_updates.filter((u) => u.id !== vanished.id),
+    };
+    await store.apply(diffIncident(trimmed, (await store.loadByIncidentId(RICH.id))!));
+
+    // Back in the payload. Whether it was really deleted or a stale copy simply
+    // did not carry it, upstream is the authority and the row returns.
+    const restored: Incident = { ...RICH, updated_at: RICH.updated_at + 2000 };
+    await store.apply(diffIncident(restored, (await store.loadByIncidentId(RICH.id))!));
+
+    const [row] = await rows<{ deleted_at: number | null; body: string }>(
+      "SELECT deleted_at, body FROM timeline WHERE id = ?1",
+      vanished.id,
+    );
+    expect(row!.deleted_at).toBeNull();
+    // Soft deletion never dropped the body, which is why this is one column.
+    expect(row!.body).toBe(vanished.body);
+
+    // And no second copy of it appeared alongside the one that came back.
+    expect(await rows("SELECT seq FROM timeline WHERE id = ?1", vanished.id)).toHaveLength(1);
+  });
 });
 
 describe("replaying a real incident against D1", () => {
